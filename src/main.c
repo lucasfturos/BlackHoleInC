@@ -1,15 +1,8 @@
 #include "Common/Math/math_utils.h"
 #include "Common/util.h"
 #include "Vec/vec2.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+
 #include <unistd.h>
-
-#define WIDTH 120
-#define HEIGHT 40
-
-#define FRAME 50000UL
 
 void render_frame(int frame) {
     Vec3 cameraPosition = Vec3_create(0.0, 0.1, -3.5);
@@ -52,7 +45,7 @@ int main(void) {
 
     for (int frame = 0; frame < 100; frame++) {
         render_frame(frame);
-        usleep(FRAME);
+        usleep(50000);
     }
     return 0;
 }

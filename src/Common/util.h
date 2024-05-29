@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define WIDTH 120
+#define HEIGHT 40
+
 static void init_random() { srand(time(0)); }
 
 static char get_ascii_char(double intensity) {
