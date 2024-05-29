@@ -3,9 +3,6 @@
 
 #include "../Common/util.h"
 
-#include <math.h>
-#include <stdio.h>
-
 typedef struct {
     double x, y, z;
 } Vec3;
@@ -33,7 +30,11 @@ static Vec3 Vec3_mul(Vec3 u, Vec3 v) {
 }
 
 static Vec3 Vec3_div_scalar(Vec3 v, double scalar) {
-    return Vec3_create(v.x / scalar, v.y / scalar, v.z / scalar);
+    if (scalar == 0) {
+        return Vec3_create(NAN, NAN, NAN);
+    } else {
+        return Vec3_create(v.x / scalar, v.y / scalar, v.z / scalar);
+    }
 }
 
 static Vec3 Vec3_mul_scalar(Vec3 v, double scalar) {

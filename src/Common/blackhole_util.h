@@ -1,15 +1,18 @@
-#include "math_utils.h"
+#ifndef BLACKHOLE_UTIL_H
+#define BLACKHOLE_UTIL_H
 
-#include <math.h>
-#include <stdio.h>
+#include "../Mat/mat3.h"
+#include "../Vec/vec4.h"
 
-void normalize_matrix(Vec3 mat[3]) {
-    mat[0] = Vec3_normalize(mat[0]);
-    mat[1] = Vec3_normalize(mat[1]);
-    mat[2] = Vec3_normalize(mat[2]);
-}
+#include <stdint.h>
 
-Vec4 Vec4_hash44(Vec3 v, double t) {
+#define dt 0.05
+#define MAX_DIST 4.0
+#define MAX_BOUNCES 8U
+#define MAX_STEPS 65536U
+#define BLACKHOLE_RADIUS 0.5
+
+static Vec4 Vec4_hash44(Vec3 v, double t) {
     Vec4 p4 = Vec4_create(v.x, v.y, v.z, t);
     Vec4 factors = Vec4_create(0.1031, 0.1030, 0.0973, 0.1099);
     p4 = Vec4_fract((Vec4){p4.x * factors.x, p4.y * factors.y, p4.z * factors.z,
@@ -29,20 +32,7 @@ Vec4 Vec4_hash44(Vec3 v, double t) {
                p4_swizzled2.z + p4_swizzled.x, p4_swizzled2.w + p4_swizzled.w});
 }
 
-double fbm(Vec3 pos) {
-    double value = 0.0;
-    double scale = 1.0;
-    double atten = 0.5;
-    for (uint32_t i = 0U; i < 8U; ++i) {
-        Vec3 scaled_pos = Vec3_mul_scalar(pos, scale);
-        value += noise(scaled_pos, 10U * i) * atten;
-        scale *= 2.2;
-        atten *= 0.5;
-    }
-    return value;
-}
-
-double noise(Vec3 pos, uint32_t octave) {
+static double noise(Vec3 pos, uint32_t octave) {
     double t = (double)octave;
     Vec3 f = Vec3_fract(pos);
     pos.x = floor(pos.x);
@@ -69,19 +59,27 @@ double noise(Vec3 pos, uint32_t octave) {
     return mix(mix_y0, mix_y1, f.z);
 }
 
-Vec3 gravitationalForce(Vec3 pos) {
-    Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
-    double R = Vec3_length(r);
-    double factor = -4.0 * 1.5 / pow(R, 5.0);
-    return Vec3_mul_scalar(r, factor);
+static double fbm(Vec3 pos) {
+    double value = 0.0;
+    double scale = 1.0;
+    double atten = 0.5;
+    for (uint32_t i = 0U; i < 8U; ++i) {
+        Vec3 scaled_pos = Vec3_mul_scalar(pos, scale);
+        value += noise(scaled_pos, 10U * i) * atten;
+        scale *= 2.2;
+        atten *= 0.5;
+    }
+    return value;
 }
 
-Vec3 XYZtoRGB(Vec3 XYZ) {
-    Vec3 XYZ2sRGB = Vec3_create(3.2406, -1.5372, -0.4986);
-    return Vec3_mul(XYZ2sRGB, XYZ);
+static Vec3 XYZtoRGB(Vec3 XYZ) {
+    const Mat3 XYZ2sRGB = Mat3_create(Vec3_create(3.240, -1.537, -0.499),
+                                      Vec3_create(-0.969, 1.876, 0.042),
+                                      Vec3_create(0.056, -0.204, 1.057));
+    return Mat3_mul_vec3(XYZ2sRGB, XYZ);
 }
 
-Vec3 blackbodyXYZ(double t) {
+static Vec3 blackbodyXYZ(double t) {
     double u_numerator =
         0.860117757 + 1.54118254E-4 * t + 1.28641212E-7 * t * t;
     double u_denominator = 1.0 + 8.42420235E-4 * t + 7.08145163E-7 * t * t;
@@ -98,12 +96,12 @@ Vec3 blackbodyXYZ(double t) {
     return Vec3_create(X, Y, Z);
 }
 
-Vec3 rotate2(Vec3 vec, double rot) {
+static Vec3 rotate2(Vec3 vec, double rot) {
     double s = sin(rot), c = cos(rot);
     return Vec3_create(vec.x * c - vec.z * s, vec.y, vec.x * s + vec.z * c);
 }
 
-double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
+static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     *volumeColor = Vec3_create(0.20, 0.15, 0.10);
     *emission = Vec3_create(0.0, 0.0, 0.0);
 
@@ -132,9 +130,16 @@ double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     return fmax(volumeNoise - densiMultLength, 0.0) * 128.0;
 }
 
-Vec3 skyColor(Vec3 dir) { return Vec3_create(0.0, 0.0, 0.0); }
+static Vec3 skyColor(Vec3 dir) { return Vec3_create(0.0, 0.0, 0.0); }
 
-Vec3 radiance(Vec3 ro, Vec3 rd) {
+static Vec3 gravitationalForce(Vec3 pos) {
+    Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
+    double R = Vec3_length(r);
+    double factor = -4.0 * 1.5 / pow(R, 5.0);
+    return Vec3_mul_scalar(r, factor);
+}
+
+static Vec3 radiance(Vec3 ro, Vec3 rd) {
     Vec3 rayPos = Vec3_add(ro, Vec3_mul_scalar(rd, random_double() * dt));
     Vec3 velocity = rd;
     Vec3 attenuation = Vec3_create(1.0, 1.0, 1.0);
@@ -174,3 +179,5 @@ Vec3 radiance(Vec3 ro, Vec3 rd) {
     }
     return Vec3_create(-1.0, -1.0, -1.0);
 }
+
+#endif //! BLACKHOLE_UTIL_H
