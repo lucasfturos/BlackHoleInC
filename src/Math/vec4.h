@@ -76,6 +76,12 @@ static Vec4 Vec4_clamp(Vec4 vec, double min, double max) {
                        fmin(fmax(vec.w, min), max));
 }
 
+static Vec4 Vec4_mix(Vec4 u, Vec4 v, double t) __attribute__((unused));
+static Vec4 Vec4_mix(Vec4 u, Vec4 v, double t) {
+    return Vec4_create(u.x * (1.0 - t) + v.x * t, u.y * (1.0 - t) + v.y * t,
+                       u.z * (1.0 - t) + v.z * t, u.w * (1.0 - t) + v.w * t);
+}
+
 //! Random
 static Vec4 Vec4_random() __attribute__((unused));
 static Vec4 Vec4_random() {

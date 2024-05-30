@@ -1,4 +1,4 @@
-#include "Common/blackhole_math.h"
+#include "Math/blackhole.h"
 #include "SDL/init.h"
 #include "SDL/objects.h"
 

@@ -1,9 +1,7 @@
 #ifndef RUN_TERMINAL_H
 #define RUN_TERMINAL_H
 
-#include "../Mat/mat3.h"
-#include "../Vec/vec2.h"
-#include "blackhole_math.h"
+#include "../Math/blackhole.h"
 
 #include <unistd.h>
 

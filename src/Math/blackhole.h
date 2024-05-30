@@ -1,17 +1,15 @@
-#ifndef BLACKHOLE_MATH_H
-#define BLACKHOLE_MATH_H
+#ifndef BLACKHOLE_H
+#define BLACKHOLE_H
 
-#include "../Mat/mat3.h"
-#include "../Vec/vec2.h"
-#include "../Vec/vec4.h"
+#include "mat3.h"
+#include "vec2.h"
+#include "vec4.h"
 
-#include <stdint.h>
-
-#define dt 0.5
+#define dt 0.3
 #define MAX_DIST 5.0
 #define MAX_BOUNCES 8U
-// #define MAX_STEPS 65536U
-#define MAX_STEPS 256U
+#define MAX_STEPS 65536U
+// #define MAX_STEPS 256U
 #define BLACKHOLE_RADIUS 0.5
 
 static Vec4 Vec4_hash44(Vec3 v, double t) {
@@ -37,28 +35,24 @@ static Vec4 Vec4_hash44(Vec3 v, double t) {
 static double noise(Vec3 pos, uint32_t octave) {
     double t = (double)octave;
     Vec3 f = Vec3_fract(pos);
-    // pos.x = floor(pos.x);
-    // pos.y = floor(pos.y);
-    // pos.z = floor(pos.z);
+    pos.x = floor(pos.x);
+    pos.y = floor(pos.y);
+    pos.z = floor(pos.z);
 
-    double t0 = Vec4_hash44(Vec3_add((Vec3){0.0, 0.0, 0.0}, pos), t).x;
-    double t1 = Vec4_hash44(Vec3_add((Vec3){1.0, 0.0, 0.0}, pos), t).x;
-    double t2 = Vec4_hash44(Vec3_add((Vec3){0.0, 1.0, 0.0}, pos), t).x;
-    double t3 = Vec4_hash44(Vec3_add((Vec3){1.0, 1.0, 0.0}, pos), t).x;
-    double t4 = Vec4_hash44(Vec3_add((Vec3){0.0, 0.0, 1.0}, pos), t).x;
-    double t5 = Vec4_hash44(Vec3_add((Vec3){1.0, 0.0, 1.0}, pos), t).x;
-    double t6 = Vec4_hash44(Vec3_add((Vec3){0.0, 1.0, 1.0}, pos), t).x;
-    double t7 = Vec4_hash44(Vec3_add((Vec3){1.0, 1.0, 1.0}, pos), t).x;
+    double t0 = Vec4_hash44(Vec3_add(Vec3_create(0.0, 0.0, 0.0), pos), t).x;
+    double t1 = Vec4_hash44(Vec3_add(Vec3_create(1.0, 0.0, 0.0), pos), t).x;
+    double t2 = Vec4_hash44(Vec3_add(Vec3_create(0.0, 1.0, 0.0), pos), t).x;
+    double t3 = Vec4_hash44(Vec3_add(Vec3_create(1.0, 1.0, 0.0), pos), t).x;
+    double t4 = Vec4_hash44(Vec3_add(Vec3_create(0.0, 0.0, 1.0), pos), t).x;
+    double t5 = Vec4_hash44(Vec3_add(Vec3_create(1.0, 0.0, 1.0), pos), t).x;
+    double t6 = Vec4_hash44(Vec3_add(Vec3_create(0.0, 1.0, 1.0), pos), t).x;
+    double t7 = Vec4_hash44(Vec3_add(Vec3_create(1.0, 1.0, 1.0), pos), t).x;
 
-    double mix_x0 = mix(t0, t1, f.x);
-    double mix_x1 = mix(t2, t3, f.x);
-    double mix_x2 = mix(t4, t5, f.x);
-    double mix_x3 = mix(t6, t7, f.x);
-
-    double mix_y0 = mix(mix_x0, mix_x1, f.y);
-    double mix_y1 = mix(mix_x2, mix_x3, f.y);
-
-    return mix(mix_y0, mix_y1, f.z);
+    Vec4 mix_x = Vec4_create(mix(t0, t1, f.x), mix(t2, t3, f.x),
+                             mix(t4, t5, f.x), mix(t6, t7, f.x));
+    Vec2 mix_y = Vec2_mix(Vec2_create(mix_x.x, mix_x.y),
+                          Vec2_create(mix_x.z, mix_x.w), f.y);
+    return mix(mix_y.x, mix_y.y, f.z);
 }
 
 static double fbm(Vec3 pos) {
@@ -87,17 +81,15 @@ static Vec3 blackbodyXYZ(double t) {
     double v = (0.317398726 + 4.22806245E-5 * t + 4.20481691E-8 * t * t) /
                (1.0 - 2.89741816E-5 * t + 1.61456053E-7 * t * t);
 
-    Vec2 xyy = Vec2_create(3.0 * u, 2.0 * v);
-    xyy = Vec2_div_scalar(xyy, 2.0 * u - 8.0 * v + 4.0);
-    return Vec3_create(xyy.x / xyy.y, 1.0, (1.0 - xyy.x - xyy.y) / xyy.y);
+    Vec2 xy = Vec2_create(3.0 * u, 2.0 * v);
+    xy = Vec2_div_scalar(xy, 2.0 * u - 8.0 * v + 4.0);
+    return Vec3_create(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y);
 }
 
 static Vec3 rotate2(Vec3 vec, double rot) {
     double s = sin(rot), c = cos(rot);
     return Vec3_create(vec.x * c - vec.z * s, vec.y, vec.x * s + vec.z * c);
 }
-
-static Vec3 skyColor() { return Vec3_create(0.0, 0.0, 0.0); }
 
 static Vec3 gravitationalForce(Vec3 pos) {
     Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
@@ -114,7 +106,7 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
         return 0.0;
     }
 
-    Vec3 gasColor = blackbodyXYZ(2300.0);
+    Vec3 gasColor = blackbodyXYZ(3300.0);
     gasColor = XYZtoRGB(gasColor);
     gasColor =
         Vec3_clamp(Vec3_div_scalar(gasColor, fmax(fmax(gasColor.x, gasColor.y),
@@ -149,9 +141,10 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
             break;
         }
         if (Vec3_dotp(rayPos) > MAX_DIST * MAX_DIST) {
-            radiance =
-                Vec3_add(radiance,
-                         Vec3_mul_scalar(attenuation, Vec3_length(skyColor())));
+            radiance = Vec3_add(
+                radiance,
+                Vec3_mul_scalar(attenuation,
+                                Vec3_length(Vec3_create(0.0, 0.0, 0.0))));
             return radiance;
         }
         double density = getDensity(rayPos, &volumeColor, &volumeEmission);
@@ -175,4 +168,4 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
     return Vec3_create(-1.0, -1.0, -1.0);
 }
 
-#endif //! BLACKHOLE_UTIL_H
+#endif //! BLACKHOLE_H

@@ -54,4 +54,9 @@ static Vec2 Vec2_fract(Vec2 v) {
     return Vec2_create(v.x - floor(v.x), v.y - floor(v.y));
 }
 
+static Vec2 Vec2_mix(Vec2 u, Vec2 v, double t) __attribute__((unused));
+static Vec2 Vec2_mix(Vec2 u, Vec2 v, double t) {
+    return Vec2_create(u.x * (1.0 - t) + v.x * t, u.y * (1.0 - t) + v.y * t);
+}
+
 #endif //! VEC2_H
