@@ -1,6 +1,7 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
+#include "../Vec/vec2.h"
 #include <SDL2/SDL.h>
 
 static void drawCircle(SDL_Renderer *ren, double x, double y, int radius,
@@ -8,11 +9,10 @@ static void drawCircle(SDL_Renderer *ren, double x, double y, int radius,
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
     for (int w = 0; w < radius * 2; ++w) {
         for (int h = 0; h < radius * 2; ++h) {
-            double dx = radius - w;
-            double dy = radius - h;
-            if ((dx * dx + dy * dy) <= (radius * radius)) {
-                SDL_RenderDrawPoint(ren, x + dx, y + dy);
-            }
+            Vec2 dPos = Vec2_create(radius - w, radius - h);
+            (Vec2_dotp(dPos) <= (radius * radius))
+                ? SDL_RenderDrawPoint(ren, x + dPos.x, y + dPos.y)
+                : 0;
         }
     }
 }

@@ -19,4 +19,10 @@ static double random_double() { return (double)rand() / RAND_MAX; }
 static double mix(double a, double b, double t) __attribute__((unused));
 static double mix(double a, double b, double t) { return a * (1 - t) + b * t; }
 
+static double clamp(double d, double min, double max) __attribute__((unused));
+static double clamp(double d, double min, double max) {
+    const double t = d < min ? min : d;
+    return t > max ? max : t;
+}
+
 #endif //! UTIL_H

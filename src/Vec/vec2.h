@@ -14,9 +14,14 @@ static Vec2 Vec2_add(Vec2 u, Vec2 v) {
     return Vec2_create(u.x + v.x, u.y + v.y);
 }
 
-static Vec2 Vec2_subtract(Vec2 u, Vec2 v) __attribute__((unused));
-static Vec2 Vec2_subtract(Vec2 u, Vec2 v) {
+static Vec2 Vec2_sub(Vec2 u, Vec2 v) __attribute__((unused));
+static Vec2 Vec2_sub(Vec2 u, Vec2 v) {
     return Vec2_create(u.x - v.x, u.y - v.y);
+}
+
+static Vec2 Vec2_mul(Vec2 u, Vec2 v) __attribute__((unused));
+static Vec2 Vec2_mul(Vec2 u, Vec2 v) {
+    return Vec2_create(u.x * v.x, u.y * v.y);
 }
 
 static Vec2 Vec2_mul_scalar(Vec2 v, double scalar) __attribute__((unused));
@@ -42,6 +47,11 @@ static Vec2 Vec2_normalize(Vec2 v) __attribute__((unused));
 static Vec2 Vec2_normalize(Vec2 v) {
     double len = Vec2_length(v);
     return Vec2_div_scalar(v, len);
+}
+
+static Vec2 Vec2_fract(Vec2 v) __attribute__((unused));
+static Vec2 Vec2_fract(Vec2 v) {
+    return Vec2_create(v.x - floor(v.x), v.y - floor(v.y));
 }
 
 #endif //! VEC2_H

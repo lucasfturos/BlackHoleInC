@@ -54,15 +54,16 @@ static Vec3 Vec3_clamp(Vec3 vec, double min, double max) {
                        fmin(fmax(vec.z, min), max));
 }
 
+static Vec3 Vec3_mix(Vec3 u, Vec3 v, double t) __attribute__((unused));
+static Vec3 Vec3_mix(Vec3 u, Vec3 v, double t) {
+    return Vec3_create(u.x * (1.0 - t) + v.x * t, u.y * (1.0 - t) + v.y * t,
+                       u.z * (1.0 - t) + v.z * t);
+}
+
 //! Vec Operations
 static Vec3 Vec3_fract(Vec3 v) __attribute__((unused));
 static Vec3 Vec3_fract(Vec3 v) {
-    Vec3 f = {
-        .x = v.x - floor(v.x),
-        .y = v.y - floor(v.y),
-        .z = v.z - floor(v.z),
-    };
-    return f;
+    return Vec3_create(v.x - floor(v.x), v.y - floor(v.y), v.z - floor(v.z));
 }
 
 static double Vec3_length(Vec3 v) __attribute__((unused));
@@ -98,12 +99,6 @@ static Vec3 Vec3_reflect(Vec3 v, Vec3 n) {
 //! Random
 static Vec3 Vec3_random() __attribute__((unused));
 static Vec3 Vec3_random() {
-    // double theta = random_double() * 2.0 * M_PI;
-    // double phi = acos(2.0 * random_double() - 1.0);
-    // double x = sin(phi) * cos(theta);
-    // double y = sin(phi) * sin(theta);
-    // double z = cos(phi);
-    // return Vec3_create(x, y, z);
     return Vec3_create(random_double(), random_double(), random_double());
 }
 

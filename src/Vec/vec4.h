@@ -68,6 +68,14 @@ static double Vec4_dot(Vec4 u, Vec4 v) {
 static double Vec4_dotp(Vec4 v) __attribute__((unused));
 static double Vec4_dotp(Vec4 v) { return Vec4_dot(v, v); }
 
+static Vec4 Vec4_clamp(Vec4 vec, double min, double max)
+    __attribute__((unused));
+static Vec4 Vec4_clamp(Vec4 vec, double min, double max) {
+    return Vec4_create(fmin(fmax(vec.x, min), max), fmin(fmax(vec.y, min), max),
+                       fmin(fmax(vec.z, min), max),
+                       fmin(fmax(vec.w, min), max));
+}
+
 //! Random
 static Vec4 Vec4_random() __attribute__((unused));
 static Vec4 Vec4_random() {

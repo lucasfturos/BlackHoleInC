@@ -3,7 +3,7 @@
 
 #include "../Mat/mat3.h"
 #include "../Vec/vec2.h"
-#include "blackhole_util.h"
+#include "blackhole_math.h"
 
 #include <unistd.h>
 

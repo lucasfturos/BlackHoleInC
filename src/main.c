@@ -21,6 +21,7 @@ void render(SDL_Renderer *ren) {
     // rotmat = Mat3_normalize(rotmat);
     for (int i = 0; i < 1000 * 4; ++i) {
         Position particle = {fmod(rand(), WIDTH - 1), fmod(rand(), HEIGHT - 1)};
+        double inverted_y = HEIGHT - 1 - particle.y;
         Vec2 uv =
             Vec2_create(particle.x / WIDTH - 0.5, particle.y / HEIGHT - 0.5);
         Vec3 rd = Vec3_normalize(
@@ -32,7 +33,7 @@ void render(SDL_Renderer *ren) {
         Uint8 g = (Uint8)(fmin(color.y * 0xFF, 0xFF));
         Uint8 b = (Uint8)(fmin(color.z * 0xFF, 0xFF));
         SDL_Color particle_color = {r, g, b, 0xFF};
-        drawCircle(ren, particle.x, particle.y, particle_radius,
+        drawCircle(ren, particle.x, inverted_y, particle_radius,
                    particle_color);
     }
 }

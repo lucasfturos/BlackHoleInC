@@ -10,8 +10,8 @@
 #define dt 0.3
 #define MAX_DIST 5.0
 #define MAX_BOUNCES 8U
-#define MAX_STEPS 65536U
-// #define MAX_STEPS 256U
+// #define MAX_STEPS 65536U
+#define MAX_STEPS 256U
 #define BLACKHOLE_RADIUS 0.5
 
 static Vec4 Vec4_hash44(Vec3 v, double t) {
@@ -97,11 +97,20 @@ static Vec3 rotate2(Vec3 vec, double rot) {
     return Vec3_create(vec.x * c - vec.z * s, vec.y, vec.x * s + vec.z * c);
 }
 
+static Vec3 skyColor() { return Vec3_create(0.0, 0.0, 0.0); }
+
+static Vec3 gravitationalForce(Vec3 pos) {
+    Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
+    double R = Vec3_length(r);
+    double factor = -4.0 * 1.5 / pow(R, 5.0);
+    return Vec3_mul_scalar(r, factor);
+}
+
 static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     *volumeColor = Vec3_create(0.20, 0.15, 0.10);
     *emission = Vec3_create(0.0, 0.0, 0.0);
 
-    if (Vec3_dotp((Vec3){pos.x, pos.z, 0.0}) > 8.0 || fabs(pos.y) > 0.3) {
+    if (Vec3_dotp((Vec3){pos.x, 0.0, pos.z}) > 8.0 || fabs(pos.y) > 0.3) {
         return 0.0;
     }
 
@@ -112,8 +121,8 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
                                                   gasColor.z)),
                    0.0, 1.0);
 
-    Vec3 rotate = rotate2((Vec3){pos.x, pos.z, 0.0},
-                          pos.y + Vec3_length((Vec3){pos.x, pos.z, 0.0}) * 2.0);
+    Vec3 rotate = rotate2((Vec3){pos.x, 0.0, pos.z},
+                          pos.y + Vec3_length((Vec3){pos.x, 0.0, pos.z}) * 2.0);
     double volumeNoise = fbm(Vec3_mul_scalar(rotate, 20.0));
     double multEmiLength =
         Vec3_length((Vec3){0.2 * pos.x, 8.0 * pos.y, 0.2 * pos.z});
@@ -124,15 +133,6 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     double densiMultLength =
         Vec3_length((Vec3){0.12 * pos.x, 7.5 * pos.y, 0.12 * pos.z});
     return fmax(volumeNoise - densiMultLength, 0.0) * 128.0;
-}
-
-static Vec3 skyColor() { return Vec3_create(0.0, 0.0, 0.0); }
-
-static Vec3 gravitationalForce(Vec3 pos) {
-    Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
-    double R = Vec3_length(r);
-    double factor = -4.0 * 1.5 / pow(R, 5.0);
-    return Vec3_mul_scalar(r, factor);
 }
 
 static Vec3 radiance(Vec3 ro, Vec3 rd) {

@@ -1,7 +1,5 @@
 # -------------------------------------------------------------------
 
-set(SRC_HEADERS)
-
 set(SRC_SOURCES
     main.c
 )
@@ -10,7 +8,6 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} 
-    ${SRC_HEADERS} 
     ${SRC_SOURCES}
 )
 
