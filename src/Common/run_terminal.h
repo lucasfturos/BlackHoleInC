@@ -1,7 +1,7 @@
 #ifndef RUN_TERMINAL_H
 #define RUN_TERMINAL_H
 
-#include "../Math/blackhole.h"
+#include "../Common/init_header.h"
 
 #include <unistd.h>
 

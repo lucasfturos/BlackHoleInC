@@ -1,7 +1,7 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include "../Common/util.h"
+#include "../Common/init_header.h"
 #include <SDL2/SDL.h>
 
 typedef struct {

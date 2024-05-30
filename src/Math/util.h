@@ -5,14 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define UNUSED __attribute__((unused))
-#define WIDTH 1080
-#define HEIGHT 720
-#define FPS 60
-
-static void UNUSED init_random() { srand(time(0)); }
 
 static double UNUSED random_double() { return (double)rand() / RAND_MAX; }
 

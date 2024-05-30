@@ -1,7 +1,7 @@
 #ifndef VEC4_H
 #define VEC4_H
 
-#include "../Common/util.h"
+#include "util.h"
 
 typedef struct {
     double x, y, z, w;
