@@ -5,8 +5,9 @@
 #include "init.h"
 #include "objects.h"
 
-static void render1(SDL_Renderer *ren) {
-    double particle_radius = 2.0;
+const double particle_radius = 2.0;
+
+static void UNUSED render1(SDL_Renderer *ren) {
     Vec3 camera = Vec3_create(0.0, 0.2, -3.5);
     // Vec3 camera = Vec3_create(0.0, 0.4, -3.0);
     double camfov = 2.3;
@@ -35,5 +36,7 @@ static void render1(SDL_Renderer *ren) {
                    particle_color);
     }
 }
+
+static void UNUSED render2(/* SDL_Renderer * ren */) {}
 
 #endif
