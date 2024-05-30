@@ -1,13 +1,12 @@
 #include "Common/blackhole_math.h"
-#include "Common/util.h"
 #include "SDL/init.h"
 #include "SDL/objects.h"
 
 void render(SDL_Renderer *ren) {
     double particle_radius = 2.0;
-    // Vec3 cameraPosition = Vec3_create(0.0, 0.2, -3.5);
-    Vec3 cameraPosition = Vec3_create(0.0, 0.4, -3.0);
-    double camfov = 2.0;
+    Vec3 cameraPosition = Vec3_create(0.0, 0.2, -3.5);
+    // Vec3 cameraPosition = Vec3_create(0.0, 0.4, -3.0);
+    double camfov = 2.3;
     Mat3 rotmat = (Mat3){
         .v[0] = Vec3_create(1.0, -0.2, 0.0),
         .v[1] = Vec3_create(0.2, 1.0, 0.1),
@@ -18,7 +17,7 @@ void render(SDL_Renderer *ren) {
     //     .v[1] = Vec3_create(0.0, 1.0, 0.0),
     //     .v[2] = Vec3_create(0.0, 0.0, 1.0),
     // };
-    // rotmat = Mat3_normalize(rotmat);
+    rotmat = Mat3_normalize(rotmat);
     for (int i = 0; i < 1000 * 4; ++i) {
         Position particle = {fmod(rand(), WIDTH - 1), fmod(rand(), HEIGHT - 1)};
         double inverted_y = HEIGHT - 1 - particle.y;

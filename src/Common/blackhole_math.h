@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#define dt 0.3
+#define dt 0.5
 #define MAX_DIST 5.0
 #define MAX_BOUNCES 8U
 // #define MAX_STEPS 65536U

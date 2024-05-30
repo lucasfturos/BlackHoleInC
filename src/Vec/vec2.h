@@ -5,7 +5,7 @@
 
 typedef struct {
     double x, y;
-} Vec2, Resolution, Position;
+} Vec2, Position;
 
 static Vec2 Vec2_create(double x, double y) { return (Vec2){.x = x, .y = y}; }
 
