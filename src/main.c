@@ -2,19 +2,24 @@
 #include "Common/util.h"
 #include "SDL/init.h"
 #include "SDL/objects.h"
-#include "Vec/vec2.h"
 
 void render(SDL_Renderer *ren) {
-    double particle_radius = 2.5;
-    Vec3 cameraPosition = Vec3_create(0.0, 0.5, -3.0);
+    double particle_radius = 2.0;
+    // Vec3 cameraPosition = Vec3_create(0.0, 0.2, -3.5);
+    Vec3 cameraPosition = Vec3_create(0.0, 0.4, -3.0);
     double camfov = 2.0;
     Mat3 rotmat = (Mat3){
         .v[0] = Vec3_create(1.0, -0.2, 0.0),
         .v[1] = Vec3_create(0.2, 1.0, 0.1),
         .v[2] = Vec3_create(0.0, -0.1, 1.0),
     };
-    rotmat = Mat3_normalize(rotmat);
-    for (int i = 0; i < 100 * 5; ++i) {
+    // Mat3 rotmat = (Mat3){
+    //     .v[0] = Vec3_create(1.0, 0.0, 0.0),
+    //     .v[1] = Vec3_create(0.0, 1.0, 0.0),
+    //     .v[2] = Vec3_create(0.0, 0.0, 1.0),
+    // };
+    // rotmat = Mat3_normalize(rotmat);
+    for (int i = 0; i < 1000 * 4; ++i) {
         Position particle = {fmod(rand(), WIDTH - 1), fmod(rand(), HEIGHT - 1)};
         Vec2 uv =
             Vec2_create(particle.x / WIDTH - 0.5, particle.y / HEIGHT - 0.5);
@@ -26,7 +31,6 @@ void render(SDL_Renderer *ren) {
         Uint8 r = (Uint8)(fmin(color.x * 0xFF, 0xFF));
         Uint8 g = (Uint8)(fmin(color.y * 0xFF, 0xFF));
         Uint8 b = (Uint8)(fmin(color.z * 0xFF, 0xFF));
-
         SDL_Color particle_color = {r, g, b, 0xFF};
         drawCircle(ren, particle.x, particle.y, particle_radius,
                    particle_color);

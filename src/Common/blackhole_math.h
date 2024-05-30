@@ -2,14 +2,16 @@
 #define BLACKHOLE_MATH_H
 
 #include "../Mat/mat3.h"
+#include "../Vec/vec2.h"
 #include "../Vec/vec4.h"
 
 #include <stdint.h>
 
-#define dt 0.05
-#define MAX_DIST 4.0
+#define dt 0.3
+#define MAX_DIST 5.0
 #define MAX_BOUNCES 8U
 #define MAX_STEPS 65536U
+// #define MAX_STEPS 256U
 #define BLACKHOLE_RADIUS 0.5
 
 static Vec4 Vec4_hash44(Vec3 v, double t) {
@@ -35,9 +37,9 @@ static Vec4 Vec4_hash44(Vec3 v, double t) {
 static double noise(Vec3 pos, uint32_t octave) {
     double t = (double)octave;
     Vec3 f = Vec3_fract(pos);
-    pos.x = floor(pos.x);
-    pos.y = floor(pos.y);
-    pos.z = floor(pos.z);
+    // pos.x = floor(pos.x);
+    // pos.y = floor(pos.y);
+    // pos.z = floor(pos.z);
 
     double t0 = Vec4_hash44(Vec3_add((Vec3){0.0, 0.0, 0.0}, pos), t).x;
     double t1 = Vec4_hash44(Vec3_add((Vec3){1.0, 0.0, 0.0}, pos), t).x;
@@ -80,20 +82,14 @@ static Vec3 XYZtoRGB(Vec3 XYZ) {
 }
 
 static Vec3 blackbodyXYZ(double t) {
-    double u_numerator =
-        0.860117757 + 1.54118254E-4 * t + 1.28641212E-7 * t * t;
-    double u_denominator = 1.0 + 8.42420235E-4 * t + 7.08145163E-7 * t * t;
-    double u = u_numerator / u_denominator;
+    double u = (0.860117757 + 1.54118254E-4 * t + 1.28641212E-7 * t * t) /
+               (1.0 + 8.42420235E-4 * t + 7.08145163E-7 * t * t);
+    double v = (0.317398726 + 4.22806245E-5 * t + 4.20481691E-8 * t * t) /
+               (1.0 - 2.89741816E-5 * t + 1.61456053E-7 * t * t);
 
-    double v_numerator =
-        0.317398726 + 4.22806245E-5 * t + 4.20481691E-8 * t * t;
-    double v_denominator = 1.0 - 2.89741816E-5 * t + 1.61456053E-7 * t * t;
-    double v = v_numerator / v_denominator;
-
-    double X = 3.0 * u / (2.0 * u - 8.0 * v + 4.0);
-    double Y = 1.0;
-    double Z = (1.0 - u - v) / (2.0 * v);
-    return Vec3_create(X, Y, Z);
+    Vec2 xyy = Vec2_create(3.0 * u, 2.0 * v);
+    xyy = Vec2_div_scalar(xyy, 2.0 * u - 8.0 * v + 4.0);
+    return Vec3_create(xyy.x / xyy.y, 1.0, (1.0 - xyy.x - xyy.y) / xyy.y);
 }
 
 static Vec3 rotate2(Vec3 vec, double rot) {
@@ -116,8 +112,8 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
                                                   gasColor.z)),
                    0.0, 1.0);
 
-    Vec3 rotate = rotate2(Vec3_create(pos.x, 0.0, pos.z),
-                          pos.y + Vec3_length((Vec3){pos.x, 0.0, pos.z}) * 2.0);
+    Vec3 rotate = rotate2((Vec3){pos.x, pos.z, 0.0},
+                          pos.y + Vec3_length((Vec3){pos.x, pos.z, 0.0}) * 2.0);
     double volumeNoise = fbm(Vec3_mul_scalar(rotate, 20.0));
     double multEmiLength =
         Vec3_length((Vec3){0.2 * pos.x, 8.0 * pos.y, 0.2 * pos.z});

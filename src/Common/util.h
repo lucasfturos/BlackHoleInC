@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 1080
+#define HEIGHT 720
 #define FPS 60
 
 static void init_random() __attribute__((unused));
