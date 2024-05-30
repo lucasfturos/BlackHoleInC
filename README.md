@@ -37,6 +37,11 @@ make
 ./src/Demo
 ```
 
+## Screenshot
+
+### Primeiro render
+
+![](/screenshot/out1.gif)
 
 ## Referências
 
