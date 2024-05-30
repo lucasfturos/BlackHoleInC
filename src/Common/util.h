@@ -6,25 +6,17 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define WIDTH 120
-#define HEIGHT 40
+#define WIDTH 800
+#define HEIGHT 600
+#define FPS 60
 
+static void init_random() __attribute__((unused));
 static void init_random() { srand(time(0)); }
 
-static char get_ascii_char(double intensity) {
-    const char *chars = " .:-=+*#%@";
-    int index = (int)(intensity * 9.0);
-    if (index < 0) {
-        index = 0;
-    }
-    if (index > 9) {
-        index = 9;
-    }
-    return chars[index];
-}
-
+static double random_double() __attribute__((unused));
 static double random_double() { return (double)rand() / RAND_MAX; }
 
+static double mix(double a, double b, double t) __attribute__((unused));
 static double mix(double a, double b, double t) { return a * (1 - t) + b * t; }
 
 #endif //! UTIL_H

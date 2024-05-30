@@ -1,5 +1,5 @@
-#ifndef BLACKHOLE_UTIL_H
-#define BLACKHOLE_UTIL_H
+#ifndef BLACKHOLE_MATH_H
+#define BLACKHOLE_MATH_H
 
 #include "../Mat/mat3.h"
 #include "../Vec/vec4.h"
@@ -130,7 +130,7 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     return fmax(volumeNoise - densiMultLength, 0.0) * 128.0;
 }
 
-static Vec3 skyColor(Vec3 dir) { return Vec3_create(0.0, 0.0, 0.0); }
+static Vec3 skyColor() { return Vec3_create(0.0, 0.0, 0.0); }
 
 static Vec3 gravitationalForce(Vec3 pos) {
     Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
@@ -153,10 +153,9 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
             break;
         }
         if (Vec3_dotp(rayPos) > MAX_DIST * MAX_DIST) {
-            radiance = Vec3_add(
-                radiance, Vec3_mul_scalar(
-                              attenuation,
-                              Vec3_length(skyColor(Vec3_normalize(velocity)))));
+            radiance =
+                Vec3_add(radiance,
+                         Vec3_mul_scalar(attenuation, Vec3_length(skyColor())));
             return radiance;
         }
         double density = getDensity(rayPos, &volumeColor, &volumeEmission);

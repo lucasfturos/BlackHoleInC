@@ -9,6 +9,7 @@ Um buraco negro feito em C
 -   CMake
 -   GCC
 -   Make
+-   SDL2
 
 ### Instruções:
 
@@ -35,3 +36,8 @@ make
 ```
 ./src/Demo
 ```
+
+
+## Referências
+
+[Path-Traced Black Hole](https://www.shadertoy.com/view/7tS3DW)
