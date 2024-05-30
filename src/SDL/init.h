@@ -1,8 +1,11 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include "../Common/init_header.h"
 #include <SDL2/SDL.h>
+
+#define WIDTH 1080
+#define HEIGHT 720
+#define FPS 60
 
 typedef struct {
     SDL_Window *win;

@@ -1,3 +1,4 @@
+#include "Math/blackhole.h"
 #include "SDL/init.h"
 #include "SDL/objects.h"
 
@@ -37,7 +38,6 @@ void render(SDL_Renderer *ren) {
 }
 
 int main(void) {
-    init_random();
     Resources res;
     initWindow(&res);
     int quit = 0;

@@ -1,9 +1,12 @@
-#ifndef RUN_TERMINAL_H
-#define RUN_TERMINAL_H
+#ifndef RUN_H
+#define RUN_H
 
-#include "../Common/init_header.h"
-
+#include "../Math/blackhole.h"
+#include <time.h>
 #include <unistd.h>
+
+#define WIDTH 140
+#define HEIGHT 40
 
 static char get_ascii_char(double intensity) {
     const char *chars = " .:-=+*#%@";
@@ -46,7 +49,7 @@ static void render_frame() {
 }
 
 static void run_terminal() {
-    init_random();
+    srand(time(0));
 
     for (int frame = 0; frame < 100; frame++) {
         render_frame();
@@ -54,4 +57,4 @@ static void run_terminal() {
     }
 }
 
-#endif //! RUN_TERMINAL_H
+#endif //! RUN_H
