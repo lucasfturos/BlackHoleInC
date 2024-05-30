@@ -12,85 +12,67 @@ static Vec4 Vec4_create(double x, double y, double z, double w) {
     return (Vec4){.x = x, .y = y, .z = z, .w = w};
 }
 
-static void Vec4_print(Vec4 v) __attribute__((unused));
-static void Vec4_print(Vec4 v) {
+static void UNUSED Vec4_print(Vec4 v) {
     printf("(%.1f, %.1f, %.1f, %.1f)\n", v.x, v.y, v.z, v.w);
 }
 
 // Operations
-static Vec4 Vec4_add(Vec4 u, Vec4 v) __attribute__((unused));
-static Vec4 Vec4_add(Vec4 u, Vec4 v) {
+static Vec4 UNUSED Vec4_add(Vec4 u, Vec4 v) {
     return Vec4_create(u.x + v.x, u.y + v.y, u.z + v.z, u.w + v.w);
 }
 
-static Vec4 Vec4_sub(Vec4 u, Vec4 v) __attribute__((unused));
-static Vec4 Vec4_sub(Vec4 u, Vec4 v) {
+static Vec4 UNUSED Vec4_sub(Vec4 u, Vec4 v) {
     return Vec4_create(u.x - v.x, u.y - v.y, u.z - v.z, u.w - v.w);
 }
 
-static Vec4 Vec4_mul(Vec4 u, Vec4 v) __attribute__((unused));
-static Vec4 Vec4_mul(Vec4 u, Vec4 v) {
+static Vec4 UNUSED Vec4_mul(Vec4 u, Vec4 v) {
     return Vec4_create(u.x * v.x, u.y * v.y, u.z * v.z, u.w * v.w);
 }
 
-static Vec4 Vec4_mul_scalar(Vec4 v, double scalar) __attribute__((unused));
-static Vec4 Vec4_mul_scalar(Vec4 v, double scalar) {
+static Vec4 UNUSED Vec4_mul_scalar(Vec4 v, double scalar) {
     return Vec4_create(v.x * scalar, v.y * scalar, v.z * scalar, v.w * scalar);
 }
 
-static Vec4 Vec4_div_scalar(Vec4 v, double scalar) __attribute__((unused));
-static Vec4 Vec4_div_scalar(Vec4 v, double scalar) {
+static Vec4 UNUSED Vec4_div_scalar(Vec4 v, double scalar) {
     return Vec4_create(v.x / scalar, v.y / scalar, v.z / scalar, v.w / scalar);
 }
 
-static Vec4 Vec4_fract(Vec4 v) __attribute__((unused));
-static Vec4 Vec4_fract(Vec4 v) {
-    return Vec4_create(v.x - floor(v.x), v.y - floor(v.y), v.z - floor(v.z),
-                       v.w - floor(v.w));
+static Vec4 UNUSED Vec4_fract(Vec4 v) {
+    return Vec4_create(fract(v.x), fract(v.y), fract(v.z), fract(v.z));
 }
 
-static double Vec4_length(Vec4 v) __attribute__((unused));
-static double Vec4_length(Vec4 v) {
+static double UNUSED Vec4_length(Vec4 v) {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
-static Vec4 Vec4_normalize(Vec4 v) __attribute__((unused));
-static Vec4 Vec4_normalize(Vec4 v) {
+static Vec4 UNUSED Vec4_normalize(Vec4 v) {
     double len = Vec4_length(v);
     return Vec4_div_scalar(v, len);
 }
 
-static double Vec4_dot(Vec4 u, Vec4 v) __attribute__((unused));
-static double Vec4_dot(Vec4 u, Vec4 v) {
+static double UNUSED Vec4_dot(Vec4 u, Vec4 v) {
     return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
 }
 
-static double Vec4_dotp(Vec4 v) __attribute__((unused));
-static double Vec4_dotp(Vec4 v) { return Vec4_dot(v, v); }
+static double UNUSED Vec4_dotp(Vec4 v) { return Vec4_dot(v, v); }
 
-static Vec4 Vec4_clamp(Vec4 vec, double min, double max)
-    __attribute__((unused));
-static Vec4 Vec4_clamp(Vec4 vec, double min, double max) {
-    return Vec4_create(fmin(fmax(vec.x, min), max), fmin(fmax(vec.y, min), max),
-                       fmin(fmax(vec.z, min), max),
-                       fmin(fmax(vec.w, min), max));
+static Vec4 UNUSED Vec4_clamp(Vec4 v, double min, double max) {
+    return Vec4_create(clamp(v.x, min, max), clamp(v.y, min, max),
+                       clamp(v.z, min, max), clamp(v.w, min, max));
 }
 
-static Vec4 Vec4_mix(Vec4 u, Vec4 v, double t) __attribute__((unused));
-static Vec4 Vec4_mix(Vec4 u, Vec4 v, double t) {
-    return Vec4_create(u.x * (1.0 - t) + v.x * t, u.y * (1.0 - t) + v.y * t,
-                       u.z * (1.0 - t) + v.z * t, u.w * (1.0 - t) + v.w * t);
+static Vec4 UNUSED Vec4_mix(Vec4 u, Vec4 v, double t) {
+    return Vec4_create(mix(u.x, v.x, t), mix(u.y, v.y, t), mix(u.z, v.z, t),
+                       mix(u.w, v.w, t));
 }
 
 //! Random
-static Vec4 Vec4_random() __attribute__((unused));
-static Vec4 Vec4_random() {
+static Vec4 UNUSED Vec4_random() {
     return Vec4_create(random_double(), random_double(), random_double(),
                        random_double());
 }
 
-static Vec4 Vec4_random_range(double min, double max) __attribute__((unused));
-static Vec4 Vec4_random_range(double min, double max) {
+static Vec4 UNUSED Vec4_random_range(double min, double max) {
     return Vec4_create(min + (max - min) * random_double(),
                        min + (max - min) * random_double(),
                        min + (max - min) * random_double(),

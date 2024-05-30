@@ -3,6 +3,7 @@
 
 #include "mat3.h"
 #include "vec2.h"
+#include "vec3.h"
 #include "vec4.h"
 
 #define dt 0.3
@@ -15,21 +16,20 @@
 static Vec4 Vec4_hash44(Vec3 v, double t) {
     Vec4 p4 = Vec4_create(v.x, v.y, v.z, t);
     Vec4 factors = Vec4_create(0.1031, 0.1030, 0.0973, 0.1099);
-    p4 = Vec4_fract((Vec4){p4.x * factors.x, p4.y * factors.y, p4.z * factors.z,
-                           p4.w * factors.w});
+    p4 = Vec4_fract(Vec4_mul(p4, factors));
 
-    Vec4 sum = Vec4_add(p4, (Vec4){p4.w, p4.z, p4.x, p4.y});
+    Vec4 sum = Vec4_add(p4, Vec4_create(p4.w, p4.z, p4.x, p4.y));
     double dot_product = Vec4_dot(p4, sum) + 33.33;
     Vec4 p4_plus_dot = Vec4_add(
-        p4, (Vec4){dot_product, dot_product, dot_product, dot_product});
+        p4, Vec4_create(dot_product, dot_product, dot_product, dot_product));
     Vec4 p4_swizzled2 =
         Vec4_create(p4_plus_dot.x, p4_plus_dot.x, p4_plus_dot.y, p4_plus_dot.z);
     Vec4 p4_swizzled =
         Vec4_create(p4_plus_dot.z, p4_plus_dot.y, p4_plus_dot.w, p4_plus_dot.x);
 
-    return Vec4_fract(
-        (Vec4){p4_swizzled2.x + p4_swizzled.y, p4_swizzled2.y + p4_swizzled.z,
-               p4_swizzled2.z + p4_swizzled.x, p4_swizzled2.w + p4_swizzled.w});
+    return Vec4_fract(Vec4_create(
+        p4_swizzled2.x + p4_swizzled.y, p4_swizzled2.y + p4_swizzled.z,
+        p4_swizzled2.z + p4_swizzled.x, p4_swizzled2.w + p4_swizzled.w));
 }
 
 static double noise(Vec3 pos, uint32_t octave) {
@@ -101,8 +101,9 @@ static Vec3 gravitationalForce(Vec3 pos) {
 static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     *volumeColor = Vec3_create(0.20, 0.15, 0.10);
     *emission = Vec3_create(0.0, 0.0, 0.0);
+    Vec3 xz = Vec3_create(pos.x, 0.0, pos.z);
 
-    if (Vec3_dotp((Vec3){pos.x, 0.0, pos.z}) > 8.0 || fabs(pos.y) > 0.3) {
+    if (Vec3_dotp(xz) > 8.0 || fabs(pos.y) > 0.3) {
         return 0.0;
     }
 
@@ -113,17 +114,16 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
                                                   gasColor.z)),
                    0.0, 1.0);
 
-    Vec3 rotate = rotate2((Vec3){pos.x, 0.0, pos.z},
-                          pos.y + Vec3_length((Vec3){pos.x, 0.0, pos.z}) * 2.0);
+    Vec3 rotate = rotate2(xz, pos.y + Vec3_length(xz) * 2.0);
     double volumeNoise = fbm(Vec3_mul_scalar(rotate, 20.0));
     double multEmiLength =
-        Vec3_length((Vec3){0.2 * pos.x, 8.0 * pos.y, 0.2 * pos.z});
+        Vec3_length(Vec3_create(0.2 * pos.x, 8.0 * pos.y, 0.2 * pos.z));
     double emissionScale = 128.0 * fmax(volumeNoise - multEmiLength, 0.0) /
                            (Vec3_dotp(pos) * Vec3_dotp(pos) + 0.05);
     *emission = Vec3_mul_scalar(gasColor, emissionScale);
 
     double densiMultLength =
-        Vec3_length((Vec3){0.12 * pos.x, 7.5 * pos.y, 0.12 * pos.z});
+        Vec3_length(Vec3_create(0.12 * pos.x, 7.5 * pos.y, 0.12 * pos.z));
     return fmax(volumeNoise - densiMultLength, 0.0) * 128.0;
 }
 
