@@ -45,4 +45,5 @@ make
 
 ## Referências
 
-[Path-Traced Black Hole](https://www.shadertoy.com/view/7tS3DW)
+1. [Path-Traced Black Hole](https://www.shadertoy.com/view/7tS3DW)
+2. [Ray Tracing Black Holes](https://eliot1019.github.io/Black-Hole-Raytracer/)

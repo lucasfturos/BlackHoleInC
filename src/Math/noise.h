@@ -8,24 +8,14 @@
 
 //! Gaussian noise generation using Box-Muller transform with precomputed values
 static double UNUSED gaussianNoise(double mu, double sigma) {
-    static const double eps = 1.0e-6;
     static const double two_pi = 2.0 * M_PI;
-
     static Vec2 z;
     static int generate;
     generate = !generate;
     if (!generate) {
         return z.y * sigma + mu;
     }
-    Vec2 u = Vec2_create(0.0, 0.0);
-    if (generate || u.x <= eps) {
-        u.x = random_double();
-        u.y = random_double();
-    }
-    if (generate) {
-        z.x = sqrt(-2.0 * log(u.x)) * cos(two_pi * u.y);
-        z.y = sqrt(-2.0 * log(u.x)) * sin(two_pi * u.y);
-    }
+    Vec2 u = Vec2_create(random_double(), random_double());
     z.x = sqrt(-2.0 * log(u.x)) * cos(two_pi * u.y);
     z.y = sqrt(-2.0 * log(u.x)) * sin(two_pi * u.y);
     return z.x * sigma + mu;
