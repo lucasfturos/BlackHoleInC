@@ -79,6 +79,11 @@ static Vec3 UNUSED Vec3_reflect(Vec3 v, Vec3 n) {
     return Vec3_sub(v, Vec3_mul_scalar(n, 2.0 * Vec3_dot(v, n)));
 }
 
+static Vec3 rotate2(Vec3 vec, double rot) {
+    double s = sin(rot), c = cos(rot);
+    return Vec3_create(vec.x * c - vec.z * s, vec.y, vec.x * s + vec.z * c);
+}
+
 //! Random
 static Vec3 UNUSED Vec3_random() {
     return Vec3_create(random_double(), random_double(), random_double());

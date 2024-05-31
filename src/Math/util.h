@@ -8,7 +8,7 @@
 
 #define UNUSED __attribute__((unused))
 
-static double UNUSED random_double() { return (double)rand() / RAND_MAX; }
+static double UNUSED random_double() { return (double)rand() / (1 * RAND_MAX); }
 
 static double UNUSED mix(double a, double b, double t) {
     return a * (1 - t) + b * t;
