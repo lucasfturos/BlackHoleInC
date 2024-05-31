@@ -55,7 +55,7 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
     Vec3 volumeEmission = Vec3_create(0.0, 0.0, 0.0);
     uint32_t bounces = 0U;
 
-    for (uint32_t i = 0U; i < MAX_STEPS; i++) {
+    for (uint32_t i = 0U; i < MAX_STEPS; ++i) {
         if (bounces > MAX_BOUNCES) {
             break;
         }
