@@ -8,8 +8,8 @@ typedef struct {
 } Mat3;
 
 //! Util
-static Mat3 Mat3_create(Vec3 col0, Vec3 col1, Vec3 col2) {
-    return (Mat3){.v = {col0, col1, col2}};
+static Mat3 Mat3_create(Vec3 row0, Vec3 row1, Vec3 row2) {
+    return (Mat3){.v = {row0, row1, row2}};
 }
 
 static void UNUSED Mat3_print(Mat3 m) {
@@ -61,14 +61,14 @@ static Mat3 UNUSED Mat3_mul(Mat3 m1, Mat3 m2) {
 
 //! Mat3 Operations
 static Vec3 UNUSED Mat3_mul_vec3(Mat3 m, Vec3 v) {
-    return Vec3_create(m.v[0].x * v.x + m.v[1].x * v.y + m.v[2].x * v.z,
-                       m.v[0].y * v.x + m.v[1].y * v.y + m.v[2].y * v.z,
-                       m.v[0].z * v.x + m.v[1].z * v.y + m.v[2].z * v.z);
+    return Vec3_create(Vec3_dot(m.v[0], v), Vec3_dot(m.v[1], v),
+                       Vec3_dot(m.v[2], v));
 }
 
 static Mat3 UNUSED Mat3_normalize(Mat3 m) {
-    return Mat3_create(Vec3_normalize(m.v[0]), Vec3_normalize(m.v[1]),
-                       Vec3_normalize(m.v[2]));
+    double len =
+        sqrt(Vec3_dotp(m.v[0]) + Vec3_dotp(m.v[1]) + Vec3_dotp(m.v[2]));
+    return Mat3_div_scalar(m, len);
 }
 
 #endif //! MAT3_H
