@@ -8,17 +8,17 @@
 const double particle_radius = 2.5;
 
 static void UNUSED render1(SDL_Renderer *ren) {
-    // Vec3 camera = Vec3_create(0.0, 0.2, -3.5);
-    Vec3 camera = Vec3_create(0.0, 0.4, -3.0);
+    Vec3 camera = Vec3_create(0.0, 0.2, -3.5);
+    // Vec3 camera = Vec3_create(0.0, 0.4, -3.0);
     double camfov = 2.3;
-    // Mat3 world =
-    //     Mat3_create(Vec3_create(1.0, -0.2, 0.0), Vec3_create(0.2, 1.0, 0.1),
-    //                 Vec3_create(0.0, -0.1, 1.0));
     Mat3 world =
-        Mat3_create(Vec3_create(1.0, 0.0, 0.0), Vec3_create(0.0, 1.0, 0.0),
-                    Vec3_create(0.0, 0.0, 1.0));
+        Mat3_create(Vec3_create(1.0, -0.2, 0.0), Vec3_create(0.2, 1.0, 0.1),
+                    Vec3_create(0.0, -0.1, 1.0));
+    // Mat3 world =
+    //     Mat3_create(Vec3_create(1.0, 0.0, 0.0), Vec3_create(0.0, 1.0, 0.0),
+    //                 Vec3_create(0.0, 0.0, 1.0));
     world = Mat3_normalize(world);
-    for (int i = 0; i < 1000 * 2; ++i) {
+    for (int i = 0; i < 1000 * 2.2; ++i) {
         Position particle = {
             .x = gaussianNoise(WIDTH / 2.0, WIDTH / 8.0),
             .y = gaussianNoise(HEIGHT / 2.0, HEIGHT / 8.0),
