@@ -55,4 +55,14 @@ static Vec2 UNUSED Vec2_mix(Vec2 u, Vec2 v, double t) {
     return Vec2_create(mix(u.x, v.x, t), mix(u.y, v.y, t));
 }
 
+// Random
+static Vec2 UNUSED Vec2_random() {
+    return Vec2_create(random_double(), random_double());
+}
+
+static Vec2 UNUSED Vec2_random_range(double min, double max) {
+    return Vec2_create(min + (max - min) * random_double(),
+                       min + (max - min) * random_double());
+}
+
 #endif //! VEC2_H

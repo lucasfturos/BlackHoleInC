@@ -36,14 +36,23 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     Vec3 rotate = rotate2(xz, pos.y + Vec3_length(xz) * 2.0);
     double volumeNoise = fbm(Vec3_mul_scalar(rotate, 20.0));
     double multEmiLength =
-        Vec3_length(Vec3_create(0.2 * pos.x, 8.0 * pos.y, 0.2 * pos.z));
+        Vec3_length(Vec3_mul(Vec3_create(0.2, 8.0, 0.2), pos));
     double emissionScale = 128.0 * fmax(volumeNoise - multEmiLength, 0.0) /
-                           (Vec3_dotp(pos) * Vec3_dotp(pos) + 0.05);
+                           ((Vec3_dotp(Vec3_mul_scalar(pos, 0.5)) *
+                             Vec3_dotp(Vec3_mul_scalar(pos, 0.5))) +
+                            0.05);
     *emission = Vec3_mul_scalar(gasColor, emissionScale);
 
     double densiMultLength =
-        Vec3_length(Vec3_create(0.12 * pos.x, 7.5 * pos.y, 0.12 * pos.z));
+        Vec3_length(Vec3_mul(Vec3_create(0.12, 7.5, 0.12), pos));
     return fmax(volumeNoise - densiMultLength, 0.0) * 128.0;
+}
+
+static Vec3 skyColor(Vec3 dir) {
+    if (Vec3_dotp(dir) < BLACKHOLE_RADIUS * BLACKHOLE_RADIUS) {
+        return dir;
+    }
+    return Vec3_create(0.0, 0.0, 0.0);
 }
 
 static Vec3 radiance(Vec3 ro, Vec3 rd) {
@@ -62,8 +71,7 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
         if (Vec3_dotp(rayPos) > MAX_DIST * MAX_DIST) {
             radiance = Vec3_add(
                 radiance,
-                Vec3_mul_scalar(attenuation,
-                                Vec3_length(Vec3_create(0.0, 0.0, 0.0))));
+                Vec3_mul(attenuation, skyColor(Vec3_normalize(velocity))));
             return radiance;
         }
         double density = getDensity(rayPos, &volumeColor, &volumeEmission);

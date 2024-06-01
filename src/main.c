@@ -1,6 +1,8 @@
 #include "SDL/render.h"
+#include <time.h>
 
 int main(void) {
+    srand(time(0));
     Resources res;
     initWindow(&res);
     int quit = 0;

@@ -17,7 +17,7 @@ static void UNUSED render1(SDL_Renderer *ren) {
     // Mat3 world = Mat3_normalize(Mat3_create(Vec3_create(1.0, 0.0, 0.0),
     //                                         Vec3_create(0.0, 1.0, 0.0),
     //                                         Vec3_create(0.0, 0.0, 1.0)));
-    for (int i = 0; i < 1000 * 2; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         Position particle = {
             .x = gaussianNoise(WIDTH / 2.0, WIDTH / 8.0),
             .y = gaussianNoise(HEIGHT / 2.0, HEIGHT / 8.0),
