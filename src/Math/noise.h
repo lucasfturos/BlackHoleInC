@@ -1,7 +1,6 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include "util.h"
 #include "vec2.h"
 #include "vec3.h"
 #include "vec4.h"
@@ -10,9 +9,9 @@
 static double UNUSED gaussianNoise(double mu, double sigma) {
     static const double two_pi = 2.0 * M_PI;
     static Vec2 z;
-    static int generate;
-    generate = !generate;
-    if (!generate) {
+    static int gen;
+    gen = !gen;
+    if (!gen) {
         return z.y * sigma + mu;
     }
     Vec2 u = Vec2_create(random_double(), random_double());
@@ -28,17 +27,17 @@ static Vec4 Vec4_hash44(Vec3 v, double t) {
     p4 = Vec4_fract(Vec4_mul(p4, factors));
 
     Vec4 sum = Vec4_add(p4, Vec4_create(p4.w, p4.z, p4.x, p4.y));
-    double dot_product = Vec4_dot(p4, sum) + 33.33;
-    Vec4 p4_plus_dot = Vec4_add(
-        p4, Vec4_create(dot_product, dot_product, dot_product, dot_product));
-    Vec4 p4_swizzled2 =
-        Vec4_create(p4_plus_dot.x, p4_plus_dot.x, p4_plus_dot.y, p4_plus_dot.z);
-    Vec4 p4_swizzled =
-        Vec4_create(p4_plus_dot.z, p4_plus_dot.y, p4_plus_dot.w, p4_plus_dot.x);
+    double dotProduct = Vec4_dot(p4, sum) + 33.33;
+    Vec4 p4PlusDot = Vec4_add(
+        p4, Vec4_create(dotProduct, dotProduct, dotProduct, dotProduct));
+    Vec4 p4Swizzled2 =
+        Vec4_create(p4PlusDot.x, p4PlusDot.x, p4PlusDot.y, p4PlusDot.z);
+    Vec4 p4Swizzled =
+        Vec4_create(p4PlusDot.z, p4PlusDot.y, p4PlusDot.w, p4PlusDot.x);
 
     return Vec4_fract(Vec4_create(
-        p4_swizzled2.x + p4_swizzled.y, p4_swizzled2.y + p4_swizzled.z,
-        p4_swizzled2.z + p4_swizzled.x, p4_swizzled2.w + p4_swizzled.w));
+        p4Swizzled2.x + p4Swizzled.y, p4Swizzled2.y + p4Swizzled.z,
+        p4Swizzled2.z + p4Swizzled.x, p4Swizzled2.w + p4Swizzled.w));
 }
 
 //! Perlin noise function
@@ -71,8 +70,8 @@ static double fbm(Vec3 pos) {
     double scale = 1.0;
     double atten = 0.5;
     for (uint32_t i = 0U; i < 8U; ++i) {
-        Vec3 scaled_pos = Vec3_mul_scalar(pos, scale);
-        value += perlinNoise(scaled_pos, 10U * i) * atten;
+        Vec3 scaledPos = Vec3_mul_scalar(pos, scale);
+        value += perlinNoise(scaledPos, 10U * i) * atten;
         scale *= 2.2;
         atten *= 0.5;
     }

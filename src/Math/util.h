@@ -1,24 +1,26 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <math.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "mat3.h"
 
-#define UNUSED __attribute__((unused))
-
-static double UNUSED random_double() { return (double)rand() / (1 * RAND_MAX); }
-
-static double UNUSED mix(double a, double b, double t) {
-    return a * (1 - t) + b * t;
+static Vec3 UNUSED toCartesian(double rho, double phi, double theta) {
+    double sinTheta = sin(theta);
+    return Vec3_mul_scalar(
+        Vec3_create(sinTheta * cos(phi), sinTheta * sin(phi), cos(theta)), rho);
 }
 
-static double UNUSED fract(double a) { return a - floor(a); }
+static void UNUSED toSpherical(Vec3 xyz, double *rho, double *phi,
+                               double *theta) {
+    *rho = Vec3_length(xyz);
+    *phi = atan2(xyz.y, xyz.x);
+    *theta = acos(xyz.z / *rho);
+}
 
-static double UNUSED clamp(double a, double min, double max) {
-    const double t = a < min ? min : a;
-    return t > max ? max : t;
+static Mat3 rotationMatrix(Vec3 lookFrom, Vec3 lookAt, Vec3 vup) {
+    Vec3 w = Vec3_normalize(Vec3_sub(lookFrom, lookAt));
+    Vec3 u = Vec3_normalize(Vec3_cross(vup, w));
+    Vec3 v = Vec3_cross(w, u);
+    return Mat3_create(w, u, v);
 }
 
 #endif //! UTIL_H

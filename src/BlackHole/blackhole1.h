@@ -1,8 +1,8 @@
-#ifndef BLACKHOLE_H
-#define BLACKHOLE_H
+#ifndef BLACKHOLE1_H
+#define BLACKHOLE1_H
 
-#include "color.h"
-#include "noise.h"
+#include "../Math/color.h"
+#include "../Math/noise.h"
 
 #define dt 0.3
 #define MAX_DIST 5.0
@@ -87,4 +87,4 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
     return Vec3_create(-1.0, -1.0, -1.0);
 }
 
-#endif //! BLACKHOLE_H
+#endif //! BLACKHOLE1_H
