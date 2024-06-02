@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "../BlackHole/blackhole1.h"
+#include "../BlackHole/blackhole2.h"
 #include "init.h"
 #include "objects.h"
 
@@ -43,6 +44,6 @@ static void UNUSED render1(SDL_Renderer *ren) {
     }
 }
 
-static void UNUSED render2(/* SDL_Renderer * ren */) {}
+// static void UNUSED render2(SDL_Renderer *ren) {}
 
 #endif

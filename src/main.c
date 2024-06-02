@@ -1,7 +1,9 @@
+#include "Math/Vec/vec3.h"
+#include "Math/common.h"
 #include "SDL/render.h"
 #include <time.h>
 
-int main(void) {
+void UNUSED run() {
     srand(time(0));
     Resources res;
     initWindow(&res);
@@ -28,5 +30,14 @@ int main(void) {
     }
     destroyResources(res);
     SDL_Quit();
+}
+
+int main(void) {
+    Vec3 v = Vec3_create(1.0, 2.0, 3.0);
+    printf("Vec3: ");
+    Vec3_print(v);
+    printf("Vec3 length: %.2f\n", Vec3_length(v));
+    printf("Vec3 dotp: %.2f\n", Vec3_dotp(v));
+
     return EXIT_SUCCESS;
 }

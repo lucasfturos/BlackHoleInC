@@ -1,9 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include "mat3.h"
-#include "vec2.h"
-#include "vec3.h"
+#include "Mat/mat3.h"
+#include "Vec/vec2.h"
+#include "Vec/vec3.h"
 
 //! Function to convert from CIE XYZ color space to RGB color space
 static Vec3 XYZtoRGB(Vec3 XYZ) {

@@ -1,7 +1,7 @@
 #ifndef VEC4_H
 #define VEC4_H
 
-#include "common.h"
+#include "../common.h"
 
 typedef struct {
     double x, y, z, w;
@@ -41,21 +41,6 @@ static Vec4 UNUSED Vec4_fract(Vec4 v) {
     return Vec4_create(fract(v.x), fract(v.y), fract(v.z), fract(v.z));
 }
 
-static double UNUSED Vec4_length(Vec4 v) {
-    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
-}
-
-static Vec4 UNUSED Vec4_normalize(Vec4 v) {
-    double len = Vec4_length(v);
-    return Vec4_div_scalar(v, len);
-}
-
-static double UNUSED Vec4_dot(Vec4 u, Vec4 v) {
-    return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
-}
-
-static double UNUSED Vec4_dotp(Vec4 v) { return Vec4_dot(v, v); }
-
 static Vec4 UNUSED Vec4_clamp(Vec4 v, double min, double max) {
     return Vec4_create(clamp(v.x, min, max), clamp(v.y, min, max),
                        clamp(v.z, min, max), clamp(v.w, min, max));
@@ -64,6 +49,20 @@ static Vec4 UNUSED Vec4_clamp(Vec4 v, double min, double max) {
 static Vec4 UNUSED Vec4_mix(Vec4 u, Vec4 v, double t) {
     return Vec4_create(mix(u.x, v.x, t), mix(u.y, v.y, t), mix(u.z, v.z, t),
                        mix(u.w, v.w, t));
+}
+
+//! Vec4 Operations
+static double UNUSED Vec4_dot(Vec4 u, Vec4 v) {
+    return u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w;
+}
+
+static double UNUSED Vec4_dotp(Vec4 v) { return Vec4_dot(v, v); }
+
+static double UNUSED Vec4_length(Vec4 v) { return sqrt(Vec4_dotp(v)); }
+
+static Vec4 UNUSED Vec4_normalize(Vec4 v) {
+    double len = Vec4_length(v);
+    return Vec4_div_scalar(v, len);
 }
 
 //! Random

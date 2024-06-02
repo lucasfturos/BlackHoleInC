@@ -1,9 +1,9 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include "vec2.h"
-#include "vec3.h"
-#include "vec4.h"
+#include "Vec/vec2.h"
+#include "Vec/vec3.h"
+#include "Vec/vec4.h"
 
 //! Gaussian noise generation using Box-Muller transform with precomputed values
 static double UNUSED gaussianNoise(double mu, double sigma) {

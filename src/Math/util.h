@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "mat3.h"
+#include "Mat/mat3.h"
 
 static Vec3 UNUSED toCartesian(double rho, double phi, double theta) {
     double sinTheta = sin(theta);
