@@ -2,7 +2,6 @@
 #define RENDER_H
 
 #include "../BlackHole/blackhole1.h"
-#include "../BlackHole/blackhole2.h"
 #include "init.h"
 #include "objects.h"
 
