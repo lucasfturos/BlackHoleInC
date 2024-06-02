@@ -16,20 +16,20 @@ static VecN VecN_create(int size) {
     };
 }
 
-static void VecN_free(VecN *v) {
+static void UNUSED VecN_free(VecN *v) {
     free(v->data);
     v->data = NULL;
     v->size = 0;
 }
 
 static void UNUSED VecN_print(VecN *v) {
+    putchar('(');
     for (int i = 0; i < v->size; ++i) {
-        printf("%f ", v->data[i]);
+        printf("%.1f, ", v->data[i]);
     }
-    printf("\n");
+    printf("\b\b)\n");
 }
 
-// Operations
 static VecN UNUSED VecN_setData(int size, double *data) {
     VecN v = VecN_create(size);
     for (int i = 0; i < size; ++i) {
@@ -51,6 +51,7 @@ static double UNUSED VecN_getValue(VecN *v, int index) {
     return 0.0;
 }
 
+// Operations
 static VecN UNUSED VecN_add(VecN *u, VecN *v) {
     if (u->size != v->size) {
         return VecN_create(0);
