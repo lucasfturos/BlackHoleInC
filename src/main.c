@@ -1,9 +1,7 @@
-#include "Math/Vec/vecn.h"
-#include "Math/common.h"
 #include "SDL/render.h"
 #include <time.h>
 
-int main(void) {
+int main() {
     srand(time(0));
     Resources res;
     initWindow(&res);

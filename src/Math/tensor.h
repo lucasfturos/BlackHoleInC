@@ -13,7 +13,7 @@ typedef struct {
 } Tensor;
 
 //! Util
-static Tensor *UNUSED Tensor_create(int num_dims, int *dims) {
+static UNUSED Tensor *Tensor_create(int num_dims, int *dims) {
     assert(num_dims > 0 && num_dims <= MAX_DIM &&
            "Invalid number of dimensions.");
     for (int i = 0; i < num_dims; ++i) {
@@ -68,6 +68,24 @@ static void UNUSED Tensor_set(Tensor *t, int *indices, double value) {
     t->data[idx] = value;
 }
 
+static UNUSED Tensor *Tensor_reshape(Tensor *t, int num_dims, int *dims) {
+    assert(t && "Invalid tensor.");
+    int total_size = 1;
+    for (int i = 0; i < num_dims; ++i) {
+        total_size *= dims[i];
+    }
+    int original_size = 1;
+    for (int i = 0; i < t->num_dims; ++i) {
+        original_size *= t->dims[i];
+    }
+    assert(total_size == original_size &&
+           "Total number of elements must not change.");
+
+    Tensor *result = Tensor_create(num_dims, dims);
+    memcpy(result->data, t->data, total_size * sizeof(double));
+    return result;
+}
+
 static void UNUSED Tensor_print(Tensor *t) {
     if (t->num_dims == 1) {
         printf("[ ");
@@ -88,80 +106,67 @@ static void UNUSED Tensor_print(Tensor *t) {
 }
 
 //! Operation
-static void UNUSED Tensor_add(Tensor *t1, Tensor *t2, Tensor *out) {
-    assert(t1 && t2 && out && "Invalid tensor.");
+static UNUSED Tensor *Tensor_add(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
     int total_size = 1;
     for (int i = 0; i < t1->num_dims; ++i) {
         total_size *= t1->dims[i];
     }
+    Tensor *result = Tensor_create(t1->num_dims, t1->dims);
     for (int i = 0; i < total_size; ++i) {
-        out->data[i] = t1->data[i] + t2->data[i];
+        result->data[i] = t1->data[i] + t2->data[i];
     }
+    return result;
 }
 
-static void UNUSED Tensor_sub(Tensor *t1, Tensor *t2, Tensor *out) {
-    assert(t1 && t2 && out && "Invalid tensor.");
+static UNUSED Tensor *Tensor_sub(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
     int total_size = 1;
     for (int i = 0; i < t1->num_dims; ++i) {
         total_size *= t1->dims[i];
     }
+    Tensor *result = Tensor_create(t1->num_dims, t1->dims);
     for (int i = 0; i < total_size; ++i) {
-        out->data[i] = t1->data[i] - t2->data[i];
+        result->data[i] = t1->data[i] - t2->data[i];
     }
+    return result;
 }
 
-static void UNUSED Tensor_product(Tensor *t1, Tensor *t2, Tensor *out) {
-    assert(t1 && t2 && out && "Invalid tensor.");
-    for (int i = 0; i < t1->num_dims; ++i) {
-        assert(t1->dims[i] == t2->dims[i] &&
-               "The tensors must have the same dimensions for the operation of "
-               "product.");
-    }
-    if (t1->num_dims != 1 || t2->num_dims != 1) {
-        fprintf(stderr, "Product is only supported for vectors (tensors "
-                        "one-dimensional).\n");
-        exit(EXIT_FAILURE);
-    }
+static Tensor *Tensor_mul(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == 1 && t2->num_dims == 1 &&
+           "The tensors must have the same dimensions for the operation of "
+           "product.");
     int rows = t1->dims[0];
     int cols = t2->dims[0];
-    int total_size = rows * cols;
-    out->num_dims = 2;
-    out->dims[0] = rows;
-    out->dims[1] = cols;
-    out->data = (double *)malloc(total_size * sizeof(double));
-    assert(out->data &&
-           "Failed to allocate memory for the output tensor data.");
-
+    int dims[]{rows, cols};
+    Tensor *result = Tensor_create(2, dims);
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            out->data[i * cols + j] = t1->data[i] * t2->data[j];
+            result->data[i * cols + j] = t1->data[i] * t2->data[j];
         }
     }
+    return result;
 }
 
-static void UNUSED Tensor_div(Tensor *t1, Tensor *t2, Tensor *out) {
-    assert(t1 && t2 && out && "Invalid tensor.");
+static UNUSED Tensor *Tensor_div(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
     for (int i = 0; i < t1->num_dims; ++i) {
         assert(t1->dims[i] == t2->dims[i] &&
                "The tensors must have the same dimensions for the operation of "
                "division.");
     }
     if (t1->num_dims != 1 || t2->num_dims != 1) {
-        fprintf(stderr, "Division is only supported for vectors (tensors)"
-                        "one-dimensional).\n");
+        fprintf(stderr, "Division is only supported for 1D tensors.\n");
         exit(EXIT_FAILURE);
     }
 
     int size = t1->dims[0];
-    out->num_dims = 1;
-    out->dims[0] = size;
-    out->data = (double *)malloc(size * sizeof(double));
-    assert(out->data &&
-           "Failed to allocate memory for the output tensor data.");
-
+    Tensor *result = Tensor_create(t1->num_dims, t1->dims);
     for (int i = 0; i < size; ++i) {
-        out->data[i] = t1->data[i] / t2->data[i];
+        result->data[i] = t1->data[i] / t2->data[i];
     }
+    return result;
 }
 
 static double UNUSED Tensor_sumElements(Tensor *t) {
@@ -175,6 +180,199 @@ static double UNUSED Tensor_sumElements(Tensor *t) {
         sum += t->data[i];
     }
     return sum;
+}
+
+//! Tensor Operation
+static double UNUSED Tensor_dot(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == 1 && t2->num_dims == 1 &&
+           "Dot product is only supported for 1D tensors.");
+    assert(t1->dims[0] == t2->dims[0] &&
+           "Tensors must have the same dimension.");
+
+    double result = 0;
+    for (int i = 0; i < t1->dims[0]; ++i) {
+        result += t1->data[i] * t2->data[i];
+    }
+    return result;
+}
+
+static UNUSED Tensor *UNUSED Tensor_cross(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == 1 && t2->num_dims == 1 &&
+           "Cross product is only supported for 1D tensors.");
+    assert(t1->dims[0] == 3 && t2->dims[0] == 3 &&
+           "Tensors must have dimension 3.");
+
+    int dims[] = {3};
+    Tensor *result = Tensor_create(1, dims);
+    result->data[0] = t1->data[1] * t2->data[2] - t1->data[2] * t2->data[1];
+    result->data[1] = t1->data[2] * t2->data[0] - t1->data[0] * t2->data[2];
+    result->data[2] = t1->data[0] * t2->data[1] - t1->data[1] * t2->data[0];
+    return result;
+}
+
+static double Tensor_det2x2(Tensor *t) {
+    return t->data[0] * t->data[3] - t->data[1] * t->data[2];
+}
+
+static double Tensor_det3x3(Tensor *t) {
+    return t->data[0] * (t->data[4] * t->data[8] - t->data[5] * t->data[7]) -
+           t->data[1] * (t->data[3] * t->data[8] - t->data[5] * t->data[6]) +
+           t->data[2] * (t->data[3] * t->data[7] - t->data[4] * t->data[6]);
+}
+
+static double UNUSED Tensor_det(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 2 && t->dims[0] == t->dims[1] &&
+           "Determinant is only supported for square matrices.");
+
+    switch (t->dims[0]) {
+    case 2:
+        return Tensor_det2x2(t);
+        break;
+    case 3:
+        return Tensor_det3x3(t);
+        break;
+    default:
+        fprintf(stderr,
+                "Determinant is only supported for 2x2 and 3x3 matrices.\n");
+        exit(EXIT_FAILURE);
+        break;
+    }
+}
+
+static UNUSED Tensor *Tensor_inverse2x2(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 2 && t->dims[0] == 2 && t->dims[1] == 2 &&
+           "Inverse is only supported for 2x2 matrices.");
+
+    double det = Tensor_det2x2(t);
+    assert(det != 0 && "Matrix is singular and cannot be inverted.");
+
+    int dims[] = {2, 2};
+    Tensor *result = Tensor_create(2, dims);
+    result->data[0] = t->data[3] / det;
+    result->data[1] = -t->data[1] / det;
+    result->data[2] = -t->data[2] / det;
+    result->data[3] = t->data[0] / det;
+    return result;
+}
+
+static UNUSED Tensor *Tensor_matrixMul(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == 2 && t2->num_dims == 2 &&
+           "Matrix multiplication is only supported for 2D tensors.");
+    assert(t1->dims[1] == t2->dims[0] &&
+           "The number of columns of the first matrix must equal the number of "
+           "rows of the second matrix.");
+
+    int rows = t1->dims[0];
+    int cols = t2->dims[1];
+    int common_dim = t1->dims[1];
+    int dims[] = {rows, cols};
+    Tensor *result = Tensor_create(2, dims);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            result->data[i * cols + j] = 0;
+            for (int k = 0; k < common_dim; ++k) {
+                result->data[i * cols + j] +=
+                    t1->data[i * common_dim + k] * t2->data[k * cols + j];
+            }
+        }
+    }
+    return result;
+}
+
+static double UNUSED Tensor_length(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 1 && "Length is only supported for 1D tensors.");
+
+    double sum = 0;
+    for (int i = 0; i < t->dims[0]; ++i) {
+        sum += t->data[i] * t->data[i];
+    }
+    return sqrt(sum);
+}
+
+static UNUSED Tensor *Tensor_normalize(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 1 &&
+           "Normalization is only supported for 1D tensors.");
+
+    int size = t->dims[0];
+    double length = Tensor_length(t);
+    Tensor *result = Tensor_create(1, &(t->dims[0]));
+    for (int i = 0; i < size; ++i) {
+        result->data[i] = t->data[i] / length;
+    }
+    return result;
+}
+
+static double UNUSED Tensor_trace(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 2 && t->dims[0] == t->dims[1] &&
+           "Trace is only supported for square matrices.");
+
+    double trace = 0;
+    for (int i = 0; i < t->dims[0]; ++i) {
+        trace += t->data[i * t->dims[0] + i];
+    }
+    return trace;
+}
+
+static UNUSED Tensor *Tensor_wedge(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == 1 && t2->num_dims == 1 &&
+           "Wedge product is only supported for 1D tensors.");
+
+    int n = t1->dims[0];
+    assert(n == t2->dims[0] && "Tensors must have the same dimension.");
+
+    int dims[] = {n, n};
+    Tensor *result = Tensor_create(2, dims);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            result->data[i * n + j] =
+                t1->data[i] * t2->data[j] - t1->data[j] * t2->data[i];
+        }
+    }
+    return result;
+}
+
+static UNUSED Tensor *Tensor_extDerivate(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 1 &&
+           "Exterior derivative is only supported for 1D tensors.");
+
+    int n = t->dims[0];
+    int dims[] = {n, n};
+    Tensor *result = Tensor_create(2, dims);
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            result->data[i * n + j] = t->data[j] - t->data[i];
+        }
+    }
+    return result;
+}
+
+static UNUSED Tensor *Tensor_hadamardProduct(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == t2->num_dims &&
+           "Tensors must have the same number of dimensions.");
+    for (int i = 0; i < t1->num_dims; ++i) {
+        assert(t1->dims[i] == t2->dims[i] &&
+               "Tensors must have the same dimensions.");
+    }
+    int total_size = 1;
+    for (int i = 0; i < t1->num_dims; ++i) {
+        total_size *= t1->dims[i];
+    }
+    Tensor *result = Tensor_create(t1->num_dims, t1->dims);
+    for (int i = 0; i < total_size; ++i) {
+        result->data[i] = t1->data[i] * t2->data[i];
+    }
+    return result;
 }
 
 #endif //! TENSOR_H

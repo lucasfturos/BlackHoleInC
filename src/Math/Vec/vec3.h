@@ -91,7 +91,7 @@ static Vec3 UNUSED Vec3_reflect(Vec3 v, Vec3 n) {
     return Vec3_sub(v, Vec3_mul_scalar(n, 2.0 * Vec3_dot(v, n)));
 }
 
-static Vec3 rotate2(Vec3 v, double rot) {
+static Vec3 UNUSED rotate2(Vec3 v, double rot) {
     double s = sin(rot), c = cos(rot);
     return Vec3_create(v.x * c - v.z * s, v.y, v.x * s + v.z * c);
 }
