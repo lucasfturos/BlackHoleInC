@@ -12,6 +12,22 @@ static Vec4 Vec4_create(double x, double y, double z, double w) {
     return (Vec4){.x = x, .y = y, .z = z, .w = w};
 }
 
+static double UNUSED Vec4_getValue(Vec4 v, int index) {
+    switch (index) {
+    case 0:
+        return v.x;
+    case 1:
+        return v.y;
+    case 2:
+        return v.z;
+    case 3:
+        return v.w;
+    default:
+        fprintf(stderr, "Index out of range in Vec4_getValue.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 static void UNUSED Vec4_print(Vec4 v) {
     printf("(%.1f, %.1f, %.1f, %.1f)\n", v.x, v.y, v.z, v.w);
 }

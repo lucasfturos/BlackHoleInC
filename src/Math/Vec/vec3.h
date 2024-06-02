@@ -12,6 +12,20 @@ static Vec3 Vec3_create(double x, double y, double z) {
     return (Vec3){.x = x, .y = y, .z = z};
 }
 
+static double UNUSED Vec3_getValue(Vec3 v, int index) {
+    switch (index) {
+    case 0:
+        return v.x;
+    case 1:
+        return v.y;
+    case 2:
+        return v.z;
+    default:
+        fprintf(stderr, "Index out of range in Vec3_getValue.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 static void UNUSED Vec3_print(Vec3 v) {
     printf("(%.1f, %.1f, %.1f)\n", v.x, v.y, v.z);
 }

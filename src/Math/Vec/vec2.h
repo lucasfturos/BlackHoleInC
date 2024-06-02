@@ -10,6 +10,18 @@ typedef struct {
 //! Util
 static Vec2 Vec2_create(double x, double y) { return (Vec2){.x = x, .y = y}; }
 
+static double UNUSED Vec2_getValue(Vec2 v, int index) {
+    switch (index) {
+    case 0:
+        return v.x;
+    case 1:
+        return v.y;
+    default:
+        fprintf(stderr, "Index out of range in Vec2_getValue.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 //! Operations
 static Vec2 UNUSED Vec2_add(Vec2 u, Vec2 v) {
     return Vec2_create(u.x + v.x, u.y + v.y);

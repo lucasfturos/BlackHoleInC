@@ -10,15 +10,16 @@ typedef struct {
 
 //! Util
 static VecN VecN_create(int size) {
-    return (VecN){
-        .size = size,
-        .data = (double *)malloc(size * sizeof(double)),
-    };
+    VecN v = {.size = size, .data = (double *)malloc(size * sizeof(double))};
+    assert(v.data != NULL && "Error allocating memory for vector.");
+    return v;
 }
 
 static void UNUSED VecN_free(VecN *v) {
-    free(v->data);
-    v->data = NULL;
+    if (v->data) {
+        free(v->data);
+        v->data = NULL;
+    }
     v->size = 0;
 }
 
@@ -39,23 +40,18 @@ static VecN UNUSED VecN_setData(int size, double *data) {
 }
 
 static void UNUSED VecN_setValue(VecN *v, int index, double value) {
-    if (index >= 0 && index < v->size) {
-        v->data[index] = value;
-    }
+    assert(index >= 0 && index < v->size && "Index out of bounds.");
+    v->data[index] = value;
 }
 
 static double UNUSED VecN_getValue(VecN *v, int index) {
-    if (index >= 0 && index < v->size) {
-        return v->data[index];
-    }
-    return 0.0;
+    assert(index >= 0 && index < v->size && "Index out of bounds.");
+    return v->data[index];
 }
 
 // Operations
 static VecN UNUSED VecN_add(VecN *u, VecN *v) {
-    if (u->size != v->size) {
-        return VecN_create(0);
-    }
+    assert(u->size == v->size && "Vectors must be of the same size.");
     VecN result = VecN_create(u->size);
     for (int i = 0; i < u->size; ++i) {
         result.data[i] = u->data[i] + v->data[i];
@@ -64,9 +60,7 @@ static VecN UNUSED VecN_add(VecN *u, VecN *v) {
 }
 
 static VecN UNUSED VecN_sub(VecN *u, VecN *v) {
-    if (u->size != v->size) {
-        return VecN_create(0);
-    }
+    assert(u->size == v->size && "Vectors must be of the same size.");
     VecN result = VecN_create(u->size);
     for (int i = 0; i < u->size; ++i) {
         result.data[i] = u->data[i] - v->data[i];
@@ -75,9 +69,7 @@ static VecN UNUSED VecN_sub(VecN *u, VecN *v) {
 }
 
 static VecN UNUSED VecN_mul(VecN *u, VecN *v) {
-    if (u->size != v->size) {
-        return VecN_create(0);
-    }
+    assert(u->size == v->size && "Vectors must be of the same size.");
     VecN result = VecN_create(u->size);
     for (int i = 0; i < u->size; ++i) {
         result.data[i] = u->data[i] * v->data[i];
@@ -94,6 +86,7 @@ static VecN UNUSED VecN_mul_scalar(VecN *v, double scalar) {
 }
 
 static VecN UNUSED VecN_div_scalar(VecN *v, double scalar) {
+    assert(scalar != 0.0 && "Scalar division by zero.");
     VecN result = VecN_create(v->size);
     for (int i = 0; i < v->size; ++i) {
         result.data[i] = v->data[i] / scalar;
@@ -110,9 +103,7 @@ static VecN UNUSED VecN_clamp(VecN *v, double min, double max) {
 }
 
 static VecN UNUSED VecN_mix(VecN *u, VecN *v, double t) {
-    if (u->size != v->size) {
-        return VecN_create(0);
-    }
+    assert(u->size == v->size && "Vectors must be of the same size.");
     VecN result = VecN_create(u->size);
     for (int i = 0; i < u->size; ++i) {
         result.data[i] = mix(u->data[i], v->data[i], t);
@@ -138,9 +129,7 @@ static VecN UNUSED VecN_floor(VecN *v) {
 
 // VecN Operations
 static double UNUSED VecN_dot(VecN *u, VecN *v) {
-    if (u->size != v->size) {
-        return 0.0;
-    }
+    assert(u->size == v->size && "Vectors must be of the same size.");
     double dot = 0.0;
     for (int i = 0; i < u->size; ++i) {
         dot += u->data[i] * v->data[i];
@@ -154,16 +143,12 @@ static double UNUSED VecN_length(VecN *v) { return sqrt(VecN_dotp(v)); }
 
 static VecN UNUSED VecN_normalize(VecN *v) {
     double len = VecN_length(v);
-    if (len == 0.0) {
-        return VecN_create(0);
-    }
+    assert(len != 0.0 && "Cannot normalize a zero-length vector.");
     return VecN_div_scalar(v, len);
 }
 
 static VecN UNUSED VecN_reflect(VecN *v, VecN *n) {
-    if (v->size != n->size) {
-        return VecN_create(0);
-    }
+    assert(v->size == n->size && "Vectors must be of the same size.");
     VecN mulScalar = VecN_mul_scalar(n, 2.0 * VecN_dot(v, n));
     return VecN_sub(v, &mulScalar);
 }
