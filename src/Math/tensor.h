@@ -139,7 +139,7 @@ static Tensor *Tensor_mul(Tensor *t1, Tensor *t2) {
            "product.");
     int rows = t1->dims[0];
     int cols = t2->dims[0];
-    int dims[]{rows, cols};
+    int dims[] = {rows, cols};
     Tensor *result = Tensor_create(2, dims);
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
