@@ -45,5 +45,6 @@ make
 
 ## Referências
 
-1. [Path-Traced Black Hole](https://www.shadertoy.com/view/7tS3DW)
-2. [Ray Tracing Black Holes](https://eliot1019.github.io/Black-Hole-Raytracer/)
+1. [Implementing General Relativity: Rendering the Schwarzschild black hole, in C++ - James (@20k)](https://20k.github.io/c++/2024/05/31/schwarzschild.html)
+2. [Path-Traced Black Hole - Zi7ar21](https://www.shadertoy.com/view/7tS3DW)
+3. [Ray Tracing Black Holes - Eliot Han, Michael Tu, Alejandro Garcia](https://eliot1019.github.io/Black-Hole-Raytracer/)

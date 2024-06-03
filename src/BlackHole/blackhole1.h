@@ -6,14 +6,14 @@
 
 #define dt 0.3
 #define MAX_DIST 5.0
-#define MAX_BOUNCES 8U
+#define MAX_BOUNCES 4U
 #define MAX_STEPS 65536U
 #define BLACKHOLE_RADIUS 0.5
 
 static Vec3 gravitationalForce(Vec3 pos) {
     Vec3 r = Vec3_div_scalar(pos, BLACKHOLE_RADIUS);
     double R = Vec3_length(r);
-    double factor = -4.0 * 1.5 / pow(R, 5.0);
+    double factor = -6.0 / (R * R * R * R * R);
     return Vec3_mul_scalar(r, factor);
 }
 
@@ -22,11 +22,11 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
     *emission = Vec3_create(0.0, 0.0, 0.0);
     Vec3 xz = Vec3_create(pos.x, 0.0, pos.z);
 
-    if (Vec3_dotp(xz) > 8.0 || fabs(pos.y) > 0.3) {
+    if (Vec3_dotp(xz) > 8.0 || fabs(pos.y) > 0.3 * 0.3) {
         return 0.0;
     }
 
-    Vec3 gasColor = colorBlackBodyXYZ(2300.0);
+    Vec3 gasColor = colorBlackBodyXYZ(3300.0);
     gasColor = XYZtoRGB(gasColor);
     gasColor =
         Vec3_clamp(Vec3_div_scalar(gasColor, fmax(fmax(gasColor.x, gasColor.y),

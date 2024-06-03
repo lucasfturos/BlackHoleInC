@@ -132,7 +132,7 @@ static UNUSED Tensor *Tensor_sub(Tensor *t1, Tensor *t2) {
     return result;
 }
 
-static Tensor *Tensor_mul(Tensor *t1, Tensor *t2) {
+static UNUSED Tensor *Tensor_mul(Tensor *t1, Tensor *t2) {
     assert(t1 && t2 && "Invalid tensor.");
     assert(t1->num_dims == 1 && t2->num_dims == 1 &&
            "The tensors must have the same dimensions for the operation of "
@@ -165,6 +165,38 @@ static UNUSED Tensor *Tensor_div(Tensor *t1, Tensor *t2) {
     Tensor *result = Tensor_create(t1->num_dims, t1->dims);
     for (int i = 0; i < size; ++i) {
         result->data[i] = t1->data[i] / t2->data[i];
+    }
+    return result;
+}
+
+static UNUSED Tensor *Tensor_mul_scalar(Tensor *t, double scalar) {
+    assert(t && "Invalid tensor.");
+    assert(t->num_dims == 1 &&
+           "The tensors must have the same dimensions for the operation of "
+           "product.");
+    int total_elements = 1;
+    for (int i = 0; i < t->num_dims; ++i) {
+        total_elements *= t->dims[i];
+    }
+
+    Tensor *result = Tensor_create(t->num_dims, t->dims);
+    for (int i = 0; i < total_elements; ++i) {
+        result->data[i] = t->data[i] * scalar;
+    }
+    return result;
+}
+
+static UNUSED Tensor *Tensor_div_scalar(Tensor *t, double scalar) {
+    assert(t && "Invalid tensor.");
+    assert(scalar == 0 && "Division by zero.\n");
+    int total_elements = 1;
+    for (int i = 0; i < t->num_dims; ++i) {
+        total_elements *= t->dims[i];
+    }
+
+    Tensor *result = Tensor_create(t->num_dims, t->dims);
+    for (int i = 0; i < total_elements; ++i) {
+        result->data[i] = t->data[i] / scalar;
     }
     return result;
 }
