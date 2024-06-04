@@ -3,6 +3,8 @@
 
 #include "../Math/tensor.h"
 
+#define RS 1.0
+
 typedef struct {
     Tensor v[4];
 } Tetrad;
@@ -13,27 +15,25 @@ typedef struct {
 } Geodesic;
 
 static UNUSED Tensor *schwarzschildMetric(Tensor *position) {
-    double rs = 1.0;
     double r = Tensor_get(position, (int[]){0, 0});
     double theta = Tensor_get(position, (int[]){0, 1});
 
     Tensor *m = Tensor_create(2, (int[]){4, 4});
-    Tensor_set(m, (int[]){0, 0}, -(1 - rs / r));
-    Tensor_set(m, (int[]){1, 1}, 1 / (1 - rs / r));
+    Tensor_set(m, (int[]){0, 0}, -(1 - RS / r));
+    Tensor_set(m, (int[]){1, 1}, 1 / (1 - RS / r));
     Tensor_set(m, (int[]){2, 2}, r * r);
     Tensor_set(m, (int[]){3, 3}, r * r * sin(theta) * sin(theta));
     return m;
 }
 
 static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor position) {
-    double rs = 1.0;
     double r = Tensor_get(&position, (int[]){0, 0});
     double theta = Tensor_get(&position, (int[]){0, 1});
 
     Tetrad result;
 
     Tensor *et = Tensor_create(1, (int[]){4});
-    Tensor_set(et, (int[]){0}, 1.0 / sqrt(1 - rs / r));
+    Tensor_set(et, (int[]){0}, 1.0 / sqrt(1 - RS / r));
     Tensor_set(et, (int[]){1}, 0);
     Tensor_set(et, (int[]){2}, 0);
     Tensor_set(et, (int[]){3}, 0);
@@ -41,7 +41,7 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor position) {
 
     Tensor *er = Tensor_create(1, (int[]){4});
     Tensor_set(er, (int[]){0}, 0);
-    Tensor_set(er, (int[]){1}, sqrt(1 - rs / r));
+    Tensor_set(er, (int[]){1}, sqrt(1 - RS / r));
     Tensor_set(er, (int[]){2}, 0);
     Tensor_set(er, (int[]){3}, 0);
     result.v[1] = *er;
