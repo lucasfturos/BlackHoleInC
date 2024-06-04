@@ -26,7 +26,7 @@ static double getDensity(Vec3 pos, Vec3 *volumeColor, Vec3 *emission) {
         return 0.0;
     }
 
-    Vec3 gasColor = colorBlackBodyXYZ(3300.0);
+    Vec3 gasColor = colorBlackBodyXYZ(2300.0);
     gasColor = XYZtoRGB(gasColor);
     gasColor =
         Vec3_clamp(Vec3_div_scalar(gasColor, fmax(fmax(gasColor.x, gasColor.y),
