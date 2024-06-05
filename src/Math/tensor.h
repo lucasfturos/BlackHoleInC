@@ -1,6 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
+#include "Mat/mat3.h"
+#include "Mat/mat4.h"
 #include "common.h"
 #include <string.h>
 
@@ -68,6 +70,17 @@ static void UNUSED Tensor_set(Tensor *t, int *indices, double value) {
     t->data[idx] = value;
 }
 
+static UNUSED Tensor *Tensor_copy(Tensor *t) {
+    assert(t && "Invalid tensor.");
+    Tensor *copy = Tensor_create(t->num_dims, t->dims);
+    int total_size = 1;
+    for (int i = 0; i < t->num_dims; ++i) {
+        total_size *= t->dims[i];
+    }
+    memcpy(copy->data, t->data, total_size * sizeof(double));
+    return copy;
+}
+
 static UNUSED Tensor *Tensor_reshape(Tensor *t, int num_dims, int *dims) {
     assert(t && "Invalid tensor.");
     int total_size = 1;
@@ -103,6 +116,54 @@ static void UNUSED Tensor_print(Tensor *t) {
             printf("\b\b\b|\n");
         }
     }
+}
+
+//! Convert
+static UNUSED Tensor *mat3ToTensor(Mat3 mat) {
+    Tensor *tensor = Tensor_create(2, (int[]){3, 3});
+    for (int i = 0; i < 3; ++i) {
+        Tensor_set(tensor, (int[]){i, 0}, mat.v[i].x);
+        Tensor_set(tensor, (int[]){i, 1}, mat.v[i].y);
+        Tensor_set(tensor, (int[]){i, 2}, mat.v[i].z);
+    }
+    return tensor;
+}
+
+static UNUSED Tensor *mat4ToTensor(Mat4 mat) {
+    Tensor *tensor = Tensor_create(2, (int[]){4, 4});
+    for (int i = 0; i < 4; ++i) {
+        Tensor_set(tensor, (int[]){i, 0}, mat.v[i].x);
+        Tensor_set(tensor, (int[]){i, 1}, mat.v[i].y);
+        Tensor_set(tensor, (int[]){i, 2}, mat.v[i].z);
+        Tensor_set(tensor, (int[]){i, 3}, mat.v[i].w);
+    }
+    return tensor;
+}
+
+static Mat3 UNUSED tensorToMat3(Tensor *t) {
+    assert(t->num_dims == 2 && t->dims[0] == 3 && t->dims[1] == 3 &&
+           "Tensor dimensions do not match Mat3 dimensions.\n");
+
+    Mat3 mat;
+    for (int i = 0; i < 3; ++i) {
+        mat.v[i] = Vec3_create(Tensor_get(t, (int[]){i, 0}),
+                               Tensor_get(t, (int[]){i, 1}),
+                               Tensor_get(t, (int[]){i, 2}));
+    }
+    return mat;
+}
+
+static Mat4 UNUSED tensorToMat4(Tensor *t) {
+    assert(t->num_dims == 2 && t->dims[0] == 4 && t->dims[1] == 4 &&
+           "Tensor dimensions do not match Mat4 dimensions.\n");
+
+    Mat4 mat;
+    for (int i = 0; i < 4; ++i) {
+        mat.v[i] = Vec4_create(
+            Tensor_get(t, (int[]){i, 0}), Tensor_get(t, (int[]){i, 1}),
+            Tensor_get(t, (int[]){i, 2}), Tensor_get(t, (int[]){i, 3}));
+    }
+    return mat;
 }
 
 //! Operation
@@ -215,6 +276,15 @@ static double UNUSED Tensor_sumElements(Tensor *t) {
 }
 
 //! Tensor Operation
+static UNUSED Tensor *Tensor_inverse(Tensor *metric) {
+    assert(metric->num_dims == 2);
+    assert(metric->dims[0] == 4 && metric->dims[1] == 4);
+
+    Mat4 mat = tensorToMat4(metric);
+    Mat4 inv_mat = Mat4_inverse(mat);
+    return mat4ToTensor(inv_mat);
+}
+
 static double UNUSED Tensor_dot(Tensor *t1, Tensor *t2) {
     assert(t1 && t2 && "Invalid tensor.");
     assert(t1->num_dims == 1 && t2->num_dims == 1 &&

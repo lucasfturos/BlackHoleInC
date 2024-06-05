@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define EPS 1.0e-6
 #define UNUSED __attribute__((unused))
 
 static double UNUSED random_double() { return (double)rand() / (1 * RAND_MAX); }

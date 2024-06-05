@@ -81,6 +81,11 @@ static Vec4 UNUSED Vec4_normalize(Vec4 v) {
     return Vec4_div_scalar(v, len);
 }
 
+static Vec4 UNUSED Vec4_cross(Vec4 u, Vec4 v) {
+    return Vec4_create(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z,
+                       u.x * v.y - u.y * v.x, 0.0);
+}
+
 //! Random
 static Vec4 UNUSED Vec4_random() {
     return Vec4_create(random_double(), random_double(), random_double(),

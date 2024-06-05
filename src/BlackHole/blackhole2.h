@@ -4,7 +4,6 @@
 #include "../Math/tensor.h"
 
 #define RS 1.0
-#define EPS 1.0e-6
 
 typedef struct {
     Tensor v[4];
@@ -102,20 +101,10 @@ static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
     return result;
 }
 
-static Tensor UNUSED func(Tensor *pos) {
-    Tensor result = *Tensor_create(1, (int[]){1});
-    double x = Tensor_get(pos, (int[]){0});
-    double y = Tensor_get(pos, (int[]){1});
-    Tensor_set(&result, (int[]){0}, x * x + y * y);
-    printf("x: %.2f, y: %.2f\n", x, y);
-    Tensor_print(&result);
-    return result;
-}
-
-static Tensor partialDerivative(Tensor (*func)(Tensor *), Tensor *pos,
-                                int dir) {
-    Tensor p_up = *pos;
-    Tensor p_lo = *pos;
+static Tensor UNUSED partialDerivative(Tensor (*func)(Tensor *), Tensor *pos,
+                                       int dir) {
+    Tensor p_up = *Tensor_copy(pos);
+    Tensor p_lo = *Tensor_copy(pos);
     Tensor_set(&p_up, (int[]){dir}, Tensor_get(pos, (int[]){dir}) + EPS);
     Tensor_set(&p_lo, (int[]){dir}, Tensor_get(pos, (int[]){dir}) - EPS);
 
@@ -125,15 +114,62 @@ static Tensor partialDerivative(Tensor (*func)(Tensor *), Tensor *pos,
     return *Tensor_mul_scalar(&diff, 1 / (2.0 * EPS));
 }
 
-static void UNUSED testPartialDerivative() {
+static UNUSED Tensor *calculateChristoff2(Tensor *position,
+                                          Tensor (*get_metric)(Tensor *)) {
+    Tensor metric = get_metric(position);
+    Tensor *metric_inverse = Tensor_inverse(&metric);
+
+    int dims_diff[] = {4, 4, 4};
+    Tensor *metric_diff = Tensor_create(3, dims_diff);
+    for (int i = 0; i < 4; ++i) {
+        Tensor differentiated = partialDerivative(get_metric, position, i);
+        for (int j = 0; j < 4; ++j) {
+            for (int k = 0; k < 4; ++k) {
+                Tensor_set(metric_diff, (int[]){i, j, k},
+                           Tensor_get(&differentiated, (int[]){j, k}));
+            }
+        }
+        Tensor_free(&differentiated);
+    }
+    int dims_gamma[] = {4, 4, 4};
+    Tensor *Gamma = Tensor_create(3, dims_gamma);
+    for (int mu = 0; mu < 4; mu++) {
+        for (int alpha = 0; alpha < 4; ++alpha) {
+            for (int beta = 0; beta < 4; ++beta) {
+                double sum = 0;
+                for (int sigma = 0; sigma < 4; sigma++) {
+                    double term1 =
+                        Tensor_get(metric_diff, (int[]){beta, sigma, alpha});
+                    double term2 =
+                        Tensor_get(metric_diff, (int[]){alpha, sigma, beta});
+                    double term3 =
+                        Tensor_get(metric_diff, (int[]){sigma, alpha, beta});
+                    double inverse =
+                        Tensor_get(metric_inverse, (int[]){mu, sigma});
+                    sum += 0.5 * inverse * (term1 + term2 - term3);
+                }
+                Tensor_set(Gamma, (int[]){mu, alpha, beta}, sum);
+            }
+        }
+    }
+    return Gamma;
+}
+
+static void UNUSED test() {
     Tensor position = *Tensor_create(1, (int[]){2});
-    Tensor_set(&position, (int[]){0}, 3.0);
-    Tensor_set(&position, (int[]){1}, 4.0);
+    Tensor_set(&position, (int[]){0}, 2.0);
+    Tensor_set(&position, (int[]){1}, M_PI / 4);
 
-    Tensor derivative = partialDerivative(&func, &position, 0);
+    Tensor metric = schwarzschildMetric(&position);
+    printf("Métrica de Schwarzschild:\n");
+    Tensor_print(&metric);
 
-    printf("Derivada parcial em relação à coordenada x: ");
-    Tensor_print(&derivative);
+    Tensor *inv_metric = Tensor_inverse(&metric);
+    if (inv_metric) {
+        printf("Inversa da métrica de Schwarzschild:\n");
+        Tensor_print(inv_metric);
+        Tensor_free(inv_metric);
+    }
 }
 
 #endif // BLACKHOLE2_H

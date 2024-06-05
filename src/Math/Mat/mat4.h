@@ -80,4 +80,31 @@ static Mat4 UNUSED Mat4_normalize(Mat4 m) {
     return Mat4_div_scalar(m, len);
 }
 
+static double UNUSED Mat4_determinant(Mat4 m) {
+    Vec4 c0 = Vec4_cross(m.v[1], m.v[2]);
+    return Vec4_dot(m.v[0], c0);
+}
+
+static Mat4 Mat4_adjugate(Mat4 m) {
+    Vec4 c0 = Vec4_cross(m.v[1], m.v[2]);
+    Vec4 c1 = Vec4_cross(m.v[2], m.v[3]);
+    Vec4 c2 = Vec4_cross(m.v[3], m.v[0]);
+    Vec4 c3 = Vec4_cross(m.v[0], m.v[1]);
+
+    return Mat4_create(Vec4_create(c0.x, c1.x, c2.x, c3.x),
+                       Vec4_create(c0.y, c1.y, c2.y, c3.y),
+                       Vec4_create(c0.z, c1.z, c2.z, c3.z),
+                       Vec4_create(c0.w, c1.w, c2.w, c3.w));
+}
+
+static Mat4 UNUSED Mat4_inverse(Mat4 m) {
+    double det = Mat4_determinant(m);
+    if (fabs(det) > EPS) {
+        return m;
+    }
+    Mat4 adj = Mat4_adjugate(m);
+    Mat4 inv = Mat4_div_scalar(adj, det);
+    return inv;
+}
+
 #endif
