@@ -17,10 +17,10 @@ static void UNUSED render1(SDL_Renderer *ren) {
     // Mat3 world = Mat3_normalize(Mat3_create(Vec3_create(1.0, 0.0, 0.0),
     //                                         Vec3_create(0.0, 1.0, 0.0),
     //                                         Vec3_create(0.0, 0.0, 1.0)));
-    for (int i = 0; i < 1000 * 5; ++i) {
+    for (int i = 0; i < 1000 * 3; ++i) {
         Position particle = {
             .x = gaussianNoise(WIDTH / 2.0, WIDTH / 5.0),
-            .y = gaussianNoise(HEIGHT / 2.0, HEIGHT - 1),
+            .y = gaussianNoise(HEIGHT / 2.0, HEIGHT / 8.0),
         };
         particle.x = fmin(fmax(particle.x, 0), WIDTH - 1);
         particle.y = fmin(fmax(particle.y, 0), HEIGHT - 1);

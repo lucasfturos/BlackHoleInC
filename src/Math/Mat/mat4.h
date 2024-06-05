@@ -103,7 +103,7 @@ static Mat4 UNUSED Mat4_inverse(Mat4 m) {
         return m;
     }
     Mat4 adj = Mat4_adjugate(m);
-    Mat4 inv = Mat4_div_scalar(adj, det);
+    Mat4 inv = Mat4_mul_scalar(adj, 1 / det);
     return inv;
 }
 

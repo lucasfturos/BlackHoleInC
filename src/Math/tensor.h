@@ -276,11 +276,11 @@ static double UNUSED Tensor_sumElements(Tensor *t) {
 }
 
 //! Tensor Operation
-static UNUSED Tensor *Tensor_inverse(Tensor *metric) {
-    assert(metric->num_dims == 2);
-    assert(metric->dims[0] == 4 && metric->dims[1] == 4);
+static UNUSED Tensor *Tensor_inverse(Tensor *t) {
+    assert(t->num_dims == 2);
+    assert(t->dims[0] == 4 && t->dims[1] == 4);
 
-    Mat4 mat = tensorToMat4(metric);
+    Mat4 mat = tensorToMat4(t);
     Mat4 inv_mat = Mat4_inverse(mat);
     return mat4ToTensor(inv_mat);
 }

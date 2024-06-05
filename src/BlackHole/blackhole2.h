@@ -14,16 +14,16 @@ typedef struct {
     Tensor velocity;
 } Geodesic;
 
-static Tensor UNUSED schwarzschildMetric(Tensor *pos) {
+static Tensor UNUSED *schwarzschildMetric(Tensor *pos) {
     double r = Tensor_get(pos, (int[]){0});
     double theta = Tensor_get(pos, (int[]){1});
     assert(r > RS);
 
-    Tensor metric = *Tensor_create(2, (int[]){4, 4});
-    Tensor_set(&metric, (int[]){0, 0}, -(1 - RS / r));
-    Tensor_set(&metric, (int[]){1, 1}, 1 / (1 - RS / r));
-    Tensor_set(&metric, (int[]){2, 2}, r * r);
-    Tensor_set(&metric, (int[]){3, 3}, r * r * sin(theta) * sin(theta));
+    Tensor *metric = Tensor_create(2, (int[]){4, 4});
+    Tensor_set(metric, (int[]){0, 0}, -(1 - RS / r));
+    Tensor_set(metric, (int[]){1, 1}, 1 / (1 - RS / r));
+    Tensor_set(metric, (int[]){2, 2}, r * r);
+    Tensor_set(metric, (int[]){3, 3}, r * r * sin(theta) * sin(theta));
     return metric;
 }
 
@@ -82,7 +82,6 @@ static Tensor UNUSED getRayThroughPixel(int sx, int sy, int width, int height,
 static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
                                              Tetrad tetrad) {
     Tensor *normalizeDir = Tensor_normalize(&dir);
-
     Tensor *t_v = Tensor_mul_scalar(&tetrad.v[0], -1.0);
     Tensor *x_v =
         Tensor_mul_scalar(&tetrad.v[1], Tensor_get(normalizeDir, (int[]){0}));
@@ -90,7 +89,6 @@ static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
         Tensor_mul_scalar(&tetrad.v[2], Tensor_get(normalizeDir, (int[]){1}));
     Tensor *z_v =
         Tensor_mul_scalar(&tetrad.v[3], Tensor_get(normalizeDir, (int[]){2}));
-
     Tensor *resultV = Tensor_add(t_v, x_v);
     Tensor_add(resultV, y_v);
     Tensor_add(resultV, z_v);
@@ -101,22 +99,23 @@ static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
     return result;
 }
 
-static Tensor UNUSED partialDerivative(Tensor (*func)(Tensor *), Tensor *pos,
-                                       int dir) {
+static Tensor partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
+                                int dir) {
     Tensor p_up = *Tensor_copy(pos);
     Tensor p_lo = *Tensor_copy(pos);
     Tensor_set(&p_up, (int[]){dir}, Tensor_get(pos, (int[]){dir}) + EPS);
     Tensor_set(&p_lo, (int[]){dir}, Tensor_get(pos, (int[]){dir}) - EPS);
 
-    Tensor up = (*func)(&p_up);
-    Tensor lo = (*func)(&p_lo);
+    Tensor up = *(*func)(&p_up);
+    Tensor lo = *(*func)(&p_lo);
     Tensor diff = *Tensor_sub(&up, &lo);
-    return *Tensor_mul_scalar(&diff, 1 / (2.0 * EPS));
+    double scalar = EPS != 0 ? 1 / (2.0 * EPS) : 0;
+    return *Tensor_mul_scalar(&diff, scalar);
 }
 
-static UNUSED Tensor *calculateChristoff2(Tensor *position,
-                                          Tensor (*get_metric)(Tensor *)) {
-    Tensor metric = get_metric(position);
+static Tensor *calculateChristoff2(Tensor *position,
+                                   Tensor *(*get_metric)(Tensor *)) {
+    Tensor metric = *get_metric(position);
     Tensor *metric_inverse = Tensor_inverse(&metric);
 
     int dims_diff[] = {4, 4, 4};
@@ -155,21 +154,51 @@ static UNUSED Tensor *calculateChristoff2(Tensor *position,
     return Gamma;
 }
 
+static Tensor *calculateAccelerationOf(Tensor *X, Tensor *v,
+                                       Tensor *(*get_metric)(Tensor *)) {
+    Tensor *christoff2 = calculateChristoff2(X, get_metric);
+    Tensor *acceleration = Tensor_create(1, (int[]){4});
+    for (int mu = 0; mu < 4; ++mu) {
+        double sum = 0;
+        for (int al = 0; al < 4; ++al) {
+            for (int be = 0; be < 4; ++be) {
+                sum += -Tensor_get(christoff2, (int[]){mu, al, be}) *
+                       Tensor_get(v, (int[]){al}) * Tensor_get(v, (int[]){be});
+            }
+        }
+        Tensor_set(acceleration, (int[]){mu}, sum);
+    }
+    Tensor_free(christoff2);
+    return acceleration;
+}
+
+static Tensor UNUSED *calculateSchwarzschildAcceleration(Tensor *X, Tensor *v) {
+    return calculateAccelerationOf(X, v, schwarzschildMetric);
+}
+
 static void UNUSED test() {
     Tensor position = *Tensor_create(1, (int[]){2});
     Tensor_set(&position, (int[]){0}, 2.0);
     Tensor_set(&position, (int[]){1}, M_PI / 4);
 
-    Tensor metric = schwarzschildMetric(&position);
+    Tensor velocity = *Tensor_create(1, (int[]){4});
+    Tensor_set(&velocity, (int[]){0}, 0.0);
+    Tensor_set(&velocity, (int[]){1}, 1.0);
+    Tensor_set(&velocity, (int[]){2}, M_PI / 4);
+    Tensor_set(&velocity, (int[]){3}, M_PI / 2);
+
+    Tensor metric = *schwarzschildMetric(&position);
     printf("Métrica de Schwarzschild:\n");
     Tensor_print(&metric);
 
-    Tensor *inv_metric = Tensor_inverse(&metric);
-    if (inv_metric) {
-        printf("Inversa da métrica de Schwarzschild:\n");
-        Tensor_print(inv_metric);
-        Tensor_free(inv_metric);
-    }
+    Tensor inv_metric = *Tensor_inverse(&metric);
+    printf("Inversa da métrica de Schwarzschild:\n");
+    Tensor_print(&inv_metric);
+
+    Tensor acceleration =
+        *calculateSchwarzschildAcceleration(&position, &velocity);
+    printf("Aceleração de Schwarzschild:\n");
+    Tensor_print(&acceleration);
 }
 
-#endif // BLACKHOLE2_H
+#endif //! BLACKHOLE2_H
