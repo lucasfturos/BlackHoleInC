@@ -1,10 +1,12 @@
 #ifndef BLACKHOLE2_H
 #define BLACKHOLE2_H
 
+#include "../Math/color.h"
 #include "../Math/tensor.h"
+#include <SDL2/SDL_surface.h>
 
-#define RS 1.0
-#define dt 0.05
+#define RS 0.5
+#define dt 0.3
 
 typedef struct {
     Tensor v[4];
@@ -28,8 +30,8 @@ typedef struct {
 static Tensor UNUSED *schwarzschildMetric(Tensor *pos) {
     assert(pos && "Invalid position tensor.");
 
-    double r = Tensor_get(pos, (int[]){0});
-    double theta = Tensor_get(pos, (int[]){1});
+    double r = Tensor_get(pos, (int[]){1});
+    double theta = Tensor_get(pos, (int[]){2});
     assert(r > RS);
 
     Tensor *metric = Tensor_create(2, (int[]){4, 4});
@@ -43,8 +45,8 @@ static Tensor UNUSED *schwarzschildMetric(Tensor *pos) {
 }
 
 static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
-    double r = Tensor_get(&pos, (int[]){0});
-    double theta = Tensor_get(&pos, (int[]){1});
+    double r = Tensor_get(&pos, (int[]){1});
+    double theta = Tensor_get(&pos, (int[]){2});
     assert(r > RS);
 
     Tetrad result;
@@ -277,15 +279,82 @@ static Tensor UNUSED angleToTex(const Tensor *angle) {
     return result;
 }
 
-static void UNUSED test() {
-    Tensor angle = *Tensor_create(1, (int[]){2});
-    Tensor_set(&angle, (int[]){0}, 3.0);
-    Tensor_set(&angle, (int[]){1}, 1.0);
-    printf("Angulo: ");
-    Tensor_print(&angle);
-    Tensor tex = angleToTex(&angle);
-    printf("Convertido para textura tex: ");
-    Tensor_print(&tex);
+static Tensor UNUSED renderPixel(int x, int y, int width, int height,
+                                 Background *background) {
+    Tensor rayDirection = getRayThroughPixel(x, y, width, height, 90);
+
+    Tensor cameraPosition = *Tensor_create(1, (int[]){4});
+    Tensor_set(&cameraPosition, (int[]){0}, 0);
+    Tensor_set(&cameraPosition, (int[]){1}, 5);
+    Tensor_set(&cameraPosition, (int[]){2}, M_PI / 2);
+    Tensor_set(&cameraPosition, (int[]){3}, -M_PI / 2);
+
+    Tetrad tetrads = calculateSchwarzschildTetrad(cameraPosition);
+    Tensor modifiedRay = *Tensor_create(1, (int[]){3});
+    Tensor_set(&modifiedRay, (int[]){0},
+               -Tensor_get(&rayDirection, (int[]){2}));
+    Tensor_set(&modifiedRay, (int[]){1}, Tensor_get(&rayDirection, (int[]){1}));
+    Tensor_set(&modifiedRay, (int[]){2}, Tensor_get(&rayDirection, (int[]){0}));
+
+    Geodesic myGeodesic =
+        makeLightlikeGeodesic(cameraPosition, modifiedRay, tetrads);
+
+    IntegrationResult result = integrate(&myGeodesic);
+    if (result.type == EVENT_HORIZON || result.type == UNFINISHED) {
+        Tensor black = *Tensor_create(1, (int[]){3});
+        Tensor_set(&black, (int[]){0}, 0);
+        Tensor_set(&black, (int[]){1}, 0);
+        Tensor_set(&black, (int[]){2}, 0);
+        return black;
+    } else {
+        double theta = Tensor_get(&myGeodesic.position, (int[]){2});
+        double phi = Tensor_get(&myGeodesic.position, (int[]){3});
+
+        Tensor angle = *Tensor_create(1, (int[]){2});
+        Tensor_set(&angle, (int[]){0}, theta);
+        Tensor_set(&angle, (int[]){1}, phi);
+
+        Tensor texCoord = angleToTex(&angle);
+        int tx = (int)(Tensor_get(&texCoord, (int[]){0}) * background->width) %
+                 background->width;
+        int ty = (int)(Tensor_get(&texCoord, (int[]){1}) * background->height) %
+                 background->height;
+
+        Pixel color = background_getPixel(background, tx, ty);
+        Tensor resultColor = *Tensor_create(1, (int[]){3});
+        Tensor_set(&resultColor, (int[]){0}, color.r / 255.0);
+        Tensor_set(&resultColor, (int[]){1}, color.g / 255.0);
+        Tensor_set(&resultColor, (int[]){2}, color.b / 255.0);
+        return resultColor;
+    }
+}
+
+static Background extractPixels(SDL_Surface *imgBackground) {
+    Background background;
+    background.width = imgBackground->w;
+    background.height = imgBackground->h;
+    background.pixels =
+        (Pixel *)malloc(background.width * background.height * sizeof(Pixel));
+    return background;
+}
+
+static UNUSED Tensor *getPixel(int width, int height,
+                               SDL_Surface *imgBackground) {
+    Background background = extractPixels(imgBackground);
+    Tensor *result = Tensor_create(2, (int[]){height, width, 3});
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            Tensor renderedPixel =
+                renderPixel(x, y, width, height, &background);
+            for (int c = 0; c < 3; ++c) {
+                Tensor_set(result, (int[]){y, x, c},
+                           Tensor_get(&renderedPixel, (int[]){c}));
+            }
+            Tensor_free(&renderedPixel);
+        }
+    }
+    // free(background.pixels);
+    return result;
 }
 
 #endif //! BLACKHOLE2_H

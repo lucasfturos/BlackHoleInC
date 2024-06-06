@@ -2,6 +2,7 @@
 #define INIT_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #define WIDTH 1080
 #define HEIGHT 720
@@ -43,6 +44,15 @@ static int initWindow(Resources *res) {
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
+}
+
+static SDL_Surface *uploadImage(const char *filename) {
+    SDL_Surface *loadedSurface = IMG_Load(filename);
+    if (loadedSurface == NULL) {
+        fprintf(stderr, "Unable to load image %s! SDL_image Error: %s\n",
+                filename, IMG_GetError());
+    }
+    return loadedSurface;
 }
 
 #endif //! INIT_H

@@ -5,7 +5,7 @@ set(SRC_SOURCES
 )
 
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+find_package(SDL2_image REQUIRED)
 
 add_executable(${PROJECT_NAME} 
     ${SRC_SOURCES}
@@ -13,12 +13,12 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} 
     PRIVATE src
-    PRIVATE ${SDL2_LIBRARIES}
 )
 
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE m
-    PRIVATE ${SDL2_LIBRARIES}
+    PRIVATE SDL2::SDL2
+    PRIVATE SDL2_image::SDL2_image
 )
 
 # -------------------------------------------------------------------

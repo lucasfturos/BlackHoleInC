@@ -13,8 +13,16 @@ project(${PROJECT_NAME})
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
+set(RESOURCES_DIRECTORY 
+    "${CMAKE_SOURCE_DIR}/assets"
+)
+
+file(COPY ${RESOURCES_DIRECTORY} 
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
+
 add_compile_options(
-  -Wall -Wextra -Wpedantic -Werror -pedantic -g
+    -Wall -Wextra -Wpedantic -Werror -pedantic -g
 )
 
 add_subdirectory(src)

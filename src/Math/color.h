@@ -4,9 +4,25 @@
 #include "Mat/mat3.h"
 #include "Vec/vec2.h"
 #include "Vec/vec3.h"
+#include "common.h"
+
+typedef struct {
+    unsigned char r, g, b;
+} Pixel;
+
+typedef struct {
+    int width, height;
+    Pixel *pixels;
+} Background;
+
+static Pixel UNUSED background_getPixel(Background *background, int x, int y) {
+    assert(x >= 0 && x < background->width);
+    assert(y >= 0 && y < background->height);
+    return background->pixels[y * background->width + x];
+}
 
 //! Function to convert from CIE XYZ color space to RGB color space
-static Vec3 XYZtoRGB(Vec3 XYZ) {
+static Vec3 UNUSED XYZtoRGB(Vec3 XYZ) {
     const Mat3 XYZ2sRGB = Mat3_create(Vec3_create(3.240, -1.537, -0.499),
                                       Vec3_create(-0.969, 1.876, 0.042),
                                       Vec3_create(0.056, -0.204, 1.057));
@@ -15,7 +31,7 @@ static Vec3 XYZtoRGB(Vec3 XYZ) {
 
 //! Function to calculate the XYZ color corresponding to a blackbody at
 //! temperature t
-static Vec3 colorBlackBodyXYZ(double t) {
+static Vec3 UNUSED colorBlackBodyXYZ(double t) {
     double u = (0.860117757 + 1.54118254E-4 * t + 1.28641212E-7 * t * t) /
                (1.0 + 8.42420235E-4 * t + 7.08145163E-7 * t * t);
     double v = (0.317398726 + 4.22806245E-5 * t + 4.20481691E-8 * t * t) /

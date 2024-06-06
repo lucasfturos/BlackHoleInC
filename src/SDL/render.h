@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "../BlackHole/blackhole1.h"
+#include "../BlackHole/blackhole2.h"
 #include "init.h"
 #include "objects.h"
 
@@ -43,6 +44,27 @@ static void UNUSED render1(SDL_Renderer *ren) {
     }
 }
 
-// static void UNUSED render2(SDL_Renderer *ren) {}
+static void UNUSED render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
+    Tensor *result = getPixel(WIDTH, HEIGHT, imgBackground);
+
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            Tensor pixelColor = result[y * WIDTH + x];
+            Uint8 r = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){0}) * 255.0,
+                                   255.0));
+            Uint8 g = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){1}) * 255.0,
+                                   255.0));
+            Uint8 b = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){2}) * 255.0,
+                                   255.0));
+            SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawPoint(ren, x, y);
+        }
+    }
+
+    Tensor_free(result);
+    // SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, imgBackground);
+    // SDL_RenderCopy(ren, texture, NULL, NULL);
+    // SDL_DestroyTexture(texture);
+}
 
 #endif
