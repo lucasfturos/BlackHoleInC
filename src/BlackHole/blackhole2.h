@@ -256,36 +256,36 @@ static IntegrationResult UNUSED integrate(Geodesic *g) {
     return result;
 }
 
-static void UNUSED test() {
-    Tensor position = *Tensor_create(1, (int[]){4});
-    Tensor_set(&position, (int[]){0}, 2.0);
-    Tensor_set(&position, (int[]){1}, 3.0);
-    Tensor_set(&position, (int[]){2}, 0.0);
-    Tensor_set(&position, (int[]){3}, 0.0);
+static Tensor UNUSED angleToTex(const Tensor *angle) {
+    assert(angle != NULL);
 
-    Tensor velocity = *Tensor_create(1, (int[]){4});
-    Tensor_set(&velocity, (int[]){0}, 0.0);
-    Tensor_set(&velocity, (int[]){1}, 0.1);
-    Tensor_set(&velocity, (int[]){2}, 0.0);
-    Tensor_set(&velocity, (int[]){3}, 0.0);
-
-    Geodesic g;
-    g.position = *Tensor_copy(&position);
-    g.velocity = *Tensor_copy(&velocity);
-
-    IntegrationResult result = integrate(&g);
-
-    switch (result.type) {
-    case ESCAPED:
-        printf("Ray escaped\n");
-        break;
-    case EVENT_HORIZON:
-        printf("Ray hit the event horizon\n");
-        break;
-    default:
-        printf("Ray did not finish\n");
-        break;
+    double theta = fmod(angle->data[0], 2 * M_PI);
+    double phi = angle->data[1];
+    if (theta >= M_PI) {
+        phi += M_PI;
+        theta -= M_PI;
     }
+    phi = fmod(phi, 2 * M_PI);
+
+    double sx = phi / (2 * M_PI);
+    double sy = theta / M_PI;
+    sx += 0.5;
+
+    Tensor result = *Tensor_create(1, (int[]){2});
+    Tensor_set(&result, (int[]){0}, sx);
+    Tensor_set(&result, (int[]){1}, sy);
+    return result;
+}
+
+static void UNUSED test() {
+    Tensor angle = *Tensor_create(1, (int[]){2});
+    Tensor_set(&angle, (int[]){0}, 3.0);
+    Tensor_set(&angle, (int[]){1}, 1.0);
+    printf("Angulo: ");
+    Tensor_print(&angle);
+    Tensor tex = angleToTex(&angle);
+    printf("Convertido para textura tex: ");
+    Tensor_print(&tex);
 }
 
 #endif //! BLACKHOLE2_H
