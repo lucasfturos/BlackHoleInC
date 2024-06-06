@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define RS 0.5
 #define EPS 1.0e-6
 #define UNUSED __attribute__((unused))
 

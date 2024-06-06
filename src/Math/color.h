@@ -5,6 +5,7 @@
 #include "Vec/vec2.h"
 #include "Vec/vec3.h"
 #include "common.h"
+#include <SDL2/SDL_surface.h>
 
 typedef struct {
     unsigned char r, g, b;
@@ -19,6 +20,15 @@ static Pixel UNUSED background_getPixel(Background *background, int x, int y) {
     assert(x >= 0 && x < background->width);
     assert(y >= 0 && y < background->height);
     return background->pixels[y * background->width + x];
+}
+
+static Background extractPixels(SDL_Surface *imgBackground) {
+    Background background;
+    background.width = imgBackground->w;
+    background.height = imgBackground->h;
+    background.pixels =
+        (Pixel *)malloc(background.width * background.height * sizeof(Pixel));
+    return background;
 }
 
 //! Function to convert from CIE XYZ color space to RGB color space

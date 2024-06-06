@@ -2,20 +2,10 @@
 #define BLACKHOLE2_H
 
 #include "../Math/color.h"
-#include "../Math/tensor.h"
-#include <SDL2/SDL_surface.h>
+#include "../Math/geodesic.h"
+#include "../Math/util.h"
 
-#define RS 0.5
 #define dt 0.3
-
-typedef struct {
-    Tensor v[4];
-} Tetrad;
-
-typedef struct {
-    Tensor position;
-    Tensor velocity;
-} Geodesic;
 
 enum HitType {
     ESCAPED,
@@ -44,47 +34,6 @@ static Tensor UNUSED *schwarzschildMetric(Tensor *pos) {
     return metric;
 }
 
-static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
-    double r = Tensor_get(&pos, (int[]){1});
-    double theta = Tensor_get(&pos, (int[]){2});
-    assert(r > RS);
-
-    Tetrad result;
-    // Vetor normalizado do tempo
-    Tensor *et = Tensor_create(1, (int[]){4});
-    assert(et && "Failed to allocate memory for t vector.");
-    Tensor_set(et, (int[]){0}, 1.0 / sqrt(1 - RS / r));
-    Tensor_set(et, (int[]){1}, 0);
-    Tensor_set(et, (int[]){2}, 0);
-    Tensor_set(et, (int[]){3}, 0);
-    result.v[0] = *et;
-    // Vetor normalizado do radial
-    Tensor *er = Tensor_create(1, (int[]){4});
-    assert(er && "Failed to allocate memory for t vector.");
-    Tensor_set(er, (int[]){0}, 0);
-    Tensor_set(er, (int[]){1}, sqrt(1 - RS / r));
-    Tensor_set(er, (int[]){2}, 0);
-    Tensor_set(er, (int[]){3}, 0);
-    result.v[1] = *er;
-    // Vetor normalizado da coordenada theta
-    Tensor *etheta = Tensor_create(1, (int[]){4});
-    assert(etheta && "Failed to allocate memory for t vector.");
-    Tensor_set(etheta, (int[]){0}, 0);
-    Tensor_set(etheta, (int[]){1}, 0);
-    Tensor_set(etheta, (int[]){2}, 1 / r);
-    Tensor_set(etheta, (int[]){3}, 0);
-    result.v[2] = *etheta;
-    // Vetor normalizado da coordenada phi
-    Tensor *ephi = Tensor_create(1, (int[]){4});
-    assert(ephi && "Failed to allocate memory for t vector.");
-    Tensor_set(ephi, (int[]){0}, 0);
-    Tensor_set(ephi, (int[]){1}, 0);
-    Tensor_set(ephi, (int[]){2}, 0);
-    Tensor_set(ephi, (int[]){3}, 1 / (r * sin(theta)));
-    result.v[3] = *ephi;
-    return result;
-}
-
 static Tensor UNUSED getRayThroughPixel(int sx, int sy, int width, int height,
                                         float fovDegrees) {
     assert(width > 0 && height > 0 && "Invalid image dimensions.");
@@ -101,64 +50,6 @@ static Tensor UNUSED getRayThroughPixel(int sx, int sy, int width, int height,
 
     Tensor result = *Tensor_normalize(pixelDir);
     Tensor_free(pixelDir);
-    return result;
-}
-
-static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
-                                             Tetrad tetrad) {
-    assert(dir.data && "Invalid direction tensor.");
-    Tensor *normalizeDir = Tensor_normalize(&dir);
-    assert(normalizeDir && "Failed to normalize direction tensor.");
-
-    Tensor *t_v = Tensor_mul_scalar(&tetrad.v[0], -1.0);
-    Tensor *x_v =
-        Tensor_mul_scalar(&tetrad.v[1], Tensor_get(normalizeDir, (int[]){0}));
-    Tensor *y_v =
-        Tensor_mul_scalar(&tetrad.v[2], Tensor_get(normalizeDir, (int[]){1}));
-    Tensor *z_v =
-        Tensor_mul_scalar(&tetrad.v[3], Tensor_get(normalizeDir, (int[]){2}));
-    Tensor *resultV = Tensor_add(t_v, x_v);
-    Tensor_add_inplace(resultV, y_v);
-    Tensor_add_inplace(resultV, z_v);
-
-    Geodesic result;
-    result.position = pos;
-    result.velocity = *resultV;
-
-    Tensor_free(normalizeDir);
-    Tensor_free(t_v);
-    Tensor_free(x_v);
-    Tensor_free(y_v);
-    Tensor_free(z_v);
-
-    return result;
-}
-
-static Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
-                                 int dir) {
-    assert(func && "Invalid function pointer.");
-    assert(pos && "Invalid position tensor.");
-    assert(dir >= 0 && dir < pos->dims[0] && "Invalid direction.");
-
-    Tensor p_up = *Tensor_copy(pos);
-    Tensor p_lo = *Tensor_copy(pos);
-    Tensor_set(&p_up, (int[]){dir}, Tensor_get(pos, (int[]){dir}) + EPS);
-    Tensor_set(&p_lo, (int[]){dir}, Tensor_get(pos, (int[]){dir}) - EPS);
-
-    Tensor *up = (*func)(&p_up);
-    Tensor *lo = (*func)(&p_lo);
-    Tensor *diff = Tensor_sub(up, lo);
-
-    double scalar = 1 / (2.0 * EPS);
-    Tensor *result = Tensor_create(diff->num_dims, diff->dims);
-    for (int i = 0; i < diff->num_dims; ++i) {
-        result->data[i] = diff->data[i] * scalar;
-    }
-
-    Tensor_free(up);
-    Tensor_free(lo);
-    Tensor_free(diff);
-
     return result;
 }
 
@@ -258,27 +149,6 @@ static IntegrationResult UNUSED integrate(Geodesic *g) {
     return result;
 }
 
-static Tensor UNUSED angleToTex(const Tensor *angle) {
-    assert(angle != NULL);
-
-    double theta = fmod(angle->data[0], 2 * M_PI);
-    double phi = angle->data[1];
-    if (theta >= M_PI) {
-        phi += M_PI;
-        theta -= M_PI;
-    }
-    phi = fmod(phi, 2 * M_PI);
-
-    double sx = phi / (2 * M_PI);
-    double sy = theta / M_PI;
-    sx += 0.5;
-
-    Tensor result = *Tensor_create(1, (int[]){2});
-    Tensor_set(&result, (int[]){0}, sx);
-    Tensor_set(&result, (int[]){1}, sy);
-    return result;
-}
-
 static Tensor UNUSED renderPixel(int x, int y, int width, int height,
                                  Background *background) {
     Tensor rayDirection = getRayThroughPixel(x, y, width, height, 90);
@@ -327,15 +197,6 @@ static Tensor UNUSED renderPixel(int x, int y, int width, int height,
         Tensor_set(&resultColor, (int[]){2}, color.b / 255.0);
         return resultColor;
     }
-}
-
-static Background extractPixels(SDL_Surface *imgBackground) {
-    Background background;
-    background.width = imgBackground->w;
-    background.height = imgBackground->h;
-    background.pixels =
-        (Pixel *)malloc(background.width * background.height * sizeof(Pixel));
-    return background;
 }
 
 static UNUSED Tensor *getPixel(int width, int height,
