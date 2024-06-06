@@ -4,6 +4,7 @@
 #include "../Math/tensor.h"
 
 #define RS 1.0
+#define dt 0.05
 
 typedef struct {
     Tensor v[4];
@@ -14,12 +15,26 @@ typedef struct {
     Tensor velocity;
 } Geodesic;
 
+enum HitType {
+    ESCAPED,
+    EVENT_HORIZON,
+    UNFINISHED,
+};
+
+typedef struct {
+    enum HitType type;
+} IntegrationResult;
+
 static Tensor UNUSED *schwarzschildMetric(Tensor *pos) {
+    assert(pos && "Invalid position tensor.");
+
     double r = Tensor_get(pos, (int[]){0});
     double theta = Tensor_get(pos, (int[]){1});
     assert(r > RS);
 
     Tensor *metric = Tensor_create(2, (int[]){4, 4});
+    assert(metric && "Failed to allocate memory for metric tensor.");
+
     Tensor_set(metric, (int[]){0, 0}, -(1 - RS / r));
     Tensor_set(metric, (int[]){1, 1}, 1 / (1 - RS / r));
     Tensor_set(metric, (int[]){2, 2}, r * r);
@@ -35,6 +50,7 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
     Tetrad result;
     // Vetor normalizado do tempo
     Tensor *et = Tensor_create(1, (int[]){4});
+    assert(et && "Failed to allocate memory for t vector.");
     Tensor_set(et, (int[]){0}, 1.0 / sqrt(1 - RS / r));
     Tensor_set(et, (int[]){1}, 0);
     Tensor_set(et, (int[]){2}, 0);
@@ -42,6 +58,7 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
     result.v[0] = *et;
     // Vetor normalizado do radial
     Tensor *er = Tensor_create(1, (int[]){4});
+    assert(er && "Failed to allocate memory for t vector.");
     Tensor_set(er, (int[]){0}, 0);
     Tensor_set(er, (int[]){1}, sqrt(1 - RS / r));
     Tensor_set(er, (int[]){2}, 0);
@@ -49,6 +66,7 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
     result.v[1] = *er;
     // Vetor normalizado da coordenada theta
     Tensor *etheta = Tensor_create(1, (int[]){4});
+    assert(etheta && "Failed to allocate memory for t vector.");
     Tensor_set(etheta, (int[]){0}, 0);
     Tensor_set(etheta, (int[]){1}, 0);
     Tensor_set(etheta, (int[]){2}, 1 / r);
@@ -56,6 +74,7 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
     result.v[2] = *etheta;
     // Vetor normalizado da coordenada phi
     Tensor *ephi = Tensor_create(1, (int[]){4});
+    assert(ephi && "Failed to allocate memory for t vector.");
     Tensor_set(ephi, (int[]){0}, 0);
     Tensor_set(ephi, (int[]){1}, 0);
     Tensor_set(ephi, (int[]){2}, 0);
@@ -66,10 +85,14 @@ static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
 
 static Tensor UNUSED getRayThroughPixel(int sx, int sy, int width, int height,
                                         float fovDegrees) {
+    assert(width > 0 && height > 0 && "Invalid image dimensions.");
+    assert(fovDegrees > 0 && fovDegrees < 180 && "Invalid field of view.");
+
     double fovRad = (fovDegrees / 360.f) * 2 * M_PI;
     double fovStop = (width / 2.0) / tan(fovRad / 2);
 
     Tensor *pixelDir = Tensor_create(1, (int[]){3});
+    assert(pixelDir && "Failed to allocate memory for pixelDir tensor.");
     Tensor_set(pixelDir, (int[]){0}, (sx - width / 2.0) / width);
     Tensor_set(pixelDir, (int[]){1}, (sy - height / 2.0) / width);
     Tensor_set(pixelDir, (int[]){2}, -fovStop / width);
@@ -81,7 +104,10 @@ static Tensor UNUSED getRayThroughPixel(int sx, int sy, int width, int height,
 
 static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
                                              Tetrad tetrad) {
+    assert(dir.data && "Invalid direction tensor.");
     Tensor *normalizeDir = Tensor_normalize(&dir);
+    assert(normalizeDir && "Failed to normalize direction tensor.");
+
     Tensor *t_v = Tensor_mul_scalar(&tetrad.v[0], -1.0);
     Tensor *x_v =
         Tensor_mul_scalar(&tetrad.v[1], Tensor_get(normalizeDir, (int[]){0}));
@@ -90,46 +116,67 @@ static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
     Tensor *z_v =
         Tensor_mul_scalar(&tetrad.v[3], Tensor_get(normalizeDir, (int[]){2}));
     Tensor *resultV = Tensor_add(t_v, x_v);
-    Tensor_add(resultV, y_v);
-    Tensor_add(resultV, z_v);
+    Tensor_add_inplace(resultV, y_v);
+    Tensor_add_inplace(resultV, z_v);
 
     Geodesic result;
     result.position = pos;
     result.velocity = *resultV;
+
+    Tensor_free(normalizeDir);
+    Tensor_free(t_v);
+    Tensor_free(x_v);
+    Tensor_free(y_v);
+    Tensor_free(z_v);
+
     return result;
 }
 
-static Tensor partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
-                                int dir) {
+static Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
+                                 int dir) {
+    assert(func && "Invalid function pointer.");
+    assert(pos && "Invalid position tensor.");
+    assert(dir >= 0 && dir < pos->dims[0] && "Invalid direction.");
+
     Tensor p_up = *Tensor_copy(pos);
     Tensor p_lo = *Tensor_copy(pos);
     Tensor_set(&p_up, (int[]){dir}, Tensor_get(pos, (int[]){dir}) + EPS);
     Tensor_set(&p_lo, (int[]){dir}, Tensor_get(pos, (int[]){dir}) - EPS);
 
-    Tensor up = *(*func)(&p_up);
-    Tensor lo = *(*func)(&p_lo);
-    Tensor diff = *Tensor_sub(&up, &lo);
-    double scalar = EPS != 0 ? 1 / (2.0 * EPS) : 0;
-    return *Tensor_mul_scalar(&diff, scalar);
+    Tensor *up = (*func)(&p_up);
+    Tensor *lo = (*func)(&p_lo);
+    Tensor *diff = Tensor_sub(up, lo);
+
+    double scalar = 1 / (2.0 * EPS);
+    Tensor *result = Tensor_create(diff->num_dims, diff->dims);
+    for (int i = 0; i < diff->num_dims; ++i) {
+        result->data[i] = diff->data[i] * scalar;
+    }
+
+    Tensor_free(up);
+    Tensor_free(lo);
+    Tensor_free(diff);
+
+    return result;
 }
 
 static Tensor *calculateChristoff2(Tensor *position,
                                    Tensor *(*get_metric)(Tensor *)) {
-    Tensor metric = *get_metric(position);
-    Tensor *metric_inverse = Tensor_inverse(&metric);
+    Tensor *metric = get_metric(position);
+    Tensor *metric_inverse = Tensor_inverse(metric);
 
     int dims_diff[] = {4, 4, 4};
     Tensor *metric_diff = Tensor_create(3, dims_diff);
     for (int i = 0; i < 4; ++i) {
-        Tensor differentiated = partialDerivative(get_metric, position, i);
+        Tensor differentiated = *partialDerivative(get_metric, position, i);
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
                 Tensor_set(metric_diff, (int[]){i, j, k},
                            Tensor_get(&differentiated, (int[]){j, k}));
             }
         }
-        Tensor_free(&differentiated);
     }
+
     int dims_gamma[] = {4, 4, 4};
     Tensor *Gamma = Tensor_create(3, dims_gamma);
     for (int mu = 0; mu < 4; mu++) {
@@ -151,6 +198,11 @@ static Tensor *calculateChristoff2(Tensor *position,
             }
         }
     }
+
+    Tensor_free(metric);
+    Tensor_free(metric_inverse);
+    Tensor_free(metric_diff);
+
     return Gamma;
 }
 
@@ -176,29 +228,64 @@ static Tensor UNUSED *calculateSchwarzschildAcceleration(Tensor *X, Tensor *v) {
     return calculateAccelerationOf(X, v, schwarzschildMetric);
 }
 
+static IntegrationResult UNUSED integrate(Geodesic *g) {
+    assert(g && "Invalid geodesic.");
+
+    IntegrationResult result;
+    result.type = UNFINISHED;
+
+    double start_time = Tensor_get(&g->position, (int[]){0});
+    for (int i = 0; i < 100 * 10; ++i) {
+        Tensor acceleration =
+            *calculateSchwarzschildAcceleration(&g->position, &g->velocity);
+
+        Tensor_add_inplace(&g->velocity, &acceleration);
+        Tensor_add_inplace(&g->position, Tensor_mul_scalar(&g->velocity, dt));
+
+        double radius = Tensor_get(&g->position, (int[]){1});
+        if (radius > 10) {
+            result.type = ESCAPED;
+            return result;
+        }
+        if (radius <= RS + EPS ||
+            Tensor_get(&g->position, (int[]){0}) > start_time + 1000) {
+            result.type = EVENT_HORIZON;
+            return result;
+        }
+    }
+    return result;
+}
+
 static void UNUSED test() {
-    Tensor position = *Tensor_create(1, (int[]){2});
+    Tensor position = *Tensor_create(1, (int[]){4});
     Tensor_set(&position, (int[]){0}, 2.0);
-    Tensor_set(&position, (int[]){1}, M_PI / 4);
+    Tensor_set(&position, (int[]){1}, 3.0);
+    Tensor_set(&position, (int[]){2}, 0.0);
+    Tensor_set(&position, (int[]){3}, 0.0);
 
     Tensor velocity = *Tensor_create(1, (int[]){4});
     Tensor_set(&velocity, (int[]){0}, 0.0);
-    Tensor_set(&velocity, (int[]){1}, 1.0);
-    Tensor_set(&velocity, (int[]){2}, M_PI / 4);
-    Tensor_set(&velocity, (int[]){3}, M_PI / 2);
+    Tensor_set(&velocity, (int[]){1}, 0.1);
+    Tensor_set(&velocity, (int[]){2}, 0.0);
+    Tensor_set(&velocity, (int[]){3}, 0.0);
 
-    Tensor metric = *schwarzschildMetric(&position);
-    printf("Métrica de Schwarzschild:\n");
-    Tensor_print(&metric);
+    Geodesic g;
+    g.position = *Tensor_copy(&position);
+    g.velocity = *Tensor_copy(&velocity);
 
-    Tensor inv_metric = *Tensor_inverse(&metric);
-    printf("Inversa da métrica de Schwarzschild:\n");
-    Tensor_print(&inv_metric);
+    IntegrationResult result = integrate(&g);
 
-    Tensor acceleration =
-        *calculateSchwarzschildAcceleration(&position, &velocity);
-    printf("Aceleração de Schwarzschild:\n");
-    Tensor_print(&acceleration);
+    switch (result.type) {
+    case ESCAPED:
+        printf("Ray escaped\n");
+        break;
+    case EVENT_HORIZON:
+        printf("Ray hit the event horizon\n");
+        break;
+    default:
+        printf("Ray did not finish\n");
+        break;
+    }
 }
 
 #endif //! BLACKHOLE2_H

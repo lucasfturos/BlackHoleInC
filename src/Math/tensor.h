@@ -180,6 +180,23 @@ static UNUSED Tensor *Tensor_add(Tensor *t1, Tensor *t2) {
     return result;
 }
 
+static void UNUSED Tensor_add_inplace(Tensor *t1, Tensor *t2) {
+    assert(t1 && t2 && "Invalid tensor.");
+    assert(t1->num_dims == t2->num_dims &&
+           "Tensors must have the same number of dimensions.");
+    for (int i = 0; i < t1->num_dims; ++i) {
+        assert(t1->dims[i] == t2->dims[i] &&
+               "Tensors must have the same dimensions.");
+    }
+    int total_size = 1;
+    for (int i = 0; i < t1->num_dims; ++i) {
+        total_size *= t1->dims[i];
+    }
+    for (int i = 0; i < total_size; ++i) {
+        t1->data[i] += t2->data[i];
+    }
+}
+
 static UNUSED Tensor *Tensor_sub(Tensor *t1, Tensor *t2) {
     assert(t1 && t2 && "Invalid tensor.");
     int total_size = 1;
