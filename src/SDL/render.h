@@ -46,7 +46,6 @@ static void UNUSED render1(SDL_Renderer *ren) {
 
 static void UNUSED render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
     Tensor *result = getPixel(WIDTH, HEIGHT, imgBackground);
-
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
             Tensor pixelColor = result[y * WIDTH + x];
@@ -60,11 +59,7 @@ static void UNUSED render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
             SDL_RenderDrawPoint(ren, x, y);
         }
     }
-
     Tensor_free(result);
-    // SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, imgBackground);
-    // SDL_RenderCopy(ren, texture, NULL, NULL);
-    // SDL_DestroyTexture(texture);
 }
 
 #endif

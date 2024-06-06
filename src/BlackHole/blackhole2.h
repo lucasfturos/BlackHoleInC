@@ -353,7 +353,7 @@ static UNUSED Tensor *getPixel(int width, int height,
             Tensor_free(&renderedPixel);
         }
     }
-    // free(background.pixels);
+    free(background.pixels);
     return result;
 }
 

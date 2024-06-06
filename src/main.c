@@ -7,8 +7,8 @@ int main() {
     initWindow(&res);
 
     const char *filename = "assets/nasa.png";
-    SDL_Surface *imageSurface = uploadImage(filename);
-    if (imageSurface == NULL) {
+    SDL_Surface *imageBackgroud = uploadImage(filename);
+    if (imageBackgroud == NULL) {
         fprintf(stderr, "Failed to load image %s\n", filename);
         destroyResources(res);
         SDL_Quit();
@@ -31,12 +31,13 @@ int main() {
         SDL_SetRenderDrawColor(res.ren, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(res.ren);
 
-        render2(res.ren, imageSurface);
+        render2(res.ren, imageBackgroud);
 
         SDL_RenderPresent(res.ren);
         SDL_Delay(1000 / FPS);
     }
     destroyResources(res);
+    SDL_FreeSurface(imageBackgroud);
     SDL_Quit();
     return EXIT_SUCCESS;
 }
