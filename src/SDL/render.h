@@ -45,10 +45,14 @@ static void UNUSED render1(SDL_Renderer *ren) {
 }
 
 static void UNUSED render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
+    int imgWidth = imgBackground->w;
+    int imgHeight = imgBackground->h;
     Tensor *result = getPixel(WIDTH, HEIGHT, imgBackground);
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            Tensor pixelColor = result[y * WIDTH + x];
+            int imgX = (int)((double)x / WIDTH * imgWidth);
+            int imgY = (int)((double)y / HEIGHT * imgHeight);
+            Tensor pixelColor = result[imgY * imgWidth + imgX];
             Uint8 r = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){0}) * 255.0,
                                    255.0));
             Uint8 g = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){1}) * 255.0,

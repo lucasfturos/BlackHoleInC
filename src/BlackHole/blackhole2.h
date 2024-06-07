@@ -58,8 +58,7 @@ static Tensor *calculateChristoff2(Tensor *position,
     Tensor *metric = get_metric(position);
     Tensor *metric_inverse = Tensor_inverse(metric);
 
-    int dims_diff[] = {4, 4, 4};
-    Tensor *metric_diff = Tensor_create(3, dims_diff);
+    Tensor *metric_diff = Tensor_create(3, (int[]){4, 4, 4});
     for (int i = 0; i < 4; ++i) {
         Tensor differentiated = *partialDerivative(get_metric, position, i);
         for (int j = 0; j < 4; ++j) {
@@ -70,8 +69,7 @@ static Tensor *calculateChristoff2(Tensor *position,
         }
     }
 
-    int dims_gamma[] = {4, 4, 4};
-    Tensor *Gamma = Tensor_create(3, dims_gamma);
+    Tensor *Gamma = Tensor_create(3, (int[]){4, 4, 4});
     for (int mu = 0; mu < 4; mu++) {
         for (int alpha = 0; alpha < 4; ++alpha) {
             for (int beta = 0; beta < 4; ++beta) {
@@ -102,6 +100,7 @@ static Tensor *calculateChristoff2(Tensor *position,
 static Tensor *calculateAccelerationOf(Tensor *X, Tensor *v,
                                        Tensor *(*get_metric)(Tensor *)) {
     Tensor *christoff2 = calculateChristoff2(X, get_metric);
+    assert(christoff2 && "Failed to calculate Christoff2 tensor.");
     Tensor *acceleration = Tensor_create(1, (int[]){4});
     for (int mu = 0; mu < 4; ++mu) {
         double sum = 0;
@@ -128,10 +127,9 @@ static IntegrationResult UNUSED integrate(Geodesic *g) {
     result.type = UNFINISHED;
 
     double start_time = Tensor_get(&g->position, (int[]){0});
-    for (int i = 0; i < 100 * 10; ++i) {
+    for (int i = 0; i < 100 * 1; ++i) {
         Tensor acceleration =
             *calculateSchwarzschildAcceleration(&g->position, &g->velocity);
-
         Tensor_add_inplace(&g->velocity, &acceleration);
         Tensor_add_inplace(&g->position, Tensor_mul_scalar(&g->velocity, dt));
 
@@ -145,12 +143,13 @@ static IntegrationResult UNUSED integrate(Geodesic *g) {
             result.type = EVENT_HORIZON;
             return result;
         }
+        Tensor_free(&acceleration);
     }
     return result;
 }
 
-static Tensor UNUSED renderPixel(int x, int y, int width, int height,
-                                 Background *background) {
+static UNUSED Tensor *renderPixel(int x, int y, int width, int height,
+                                  Background *background) {
     Tensor rayDirection = getRayThroughPixel(x, y, width, height, 90);
 
     Tensor cameraPosition = *Tensor_create(1, (int[]){4});
@@ -171,10 +170,10 @@ static Tensor UNUSED renderPixel(int x, int y, int width, int height,
 
     IntegrationResult result = integrate(&myGeodesic);
     if (result.type == EVENT_HORIZON || result.type == UNFINISHED) {
-        Tensor black = *Tensor_create(1, (int[]){3});
-        Tensor_set(&black, (int[]){0}, 0);
-        Tensor_set(&black, (int[]){1}, 0);
-        Tensor_set(&black, (int[]){2}, 0);
+        Tensor *black = Tensor_create(1, (int[]){3});
+        Tensor_set(black, (int[]){0}, 0);
+        Tensor_set(black, (int[]){1}, 0);
+        Tensor_set(black, (int[]){2}, 0);
         return black;
     } else {
         double theta = Tensor_get(&myGeodesic.position, (int[]){2});
@@ -191,29 +190,39 @@ static Tensor UNUSED renderPixel(int x, int y, int width, int height,
                  background->height;
 
         Pixel color = background_getPixel(background, tx, ty);
-        Tensor resultColor = *Tensor_create(1, (int[]){3});
-        Tensor_set(&resultColor, (int[]){0}, color.r / 255.0);
-        Tensor_set(&resultColor, (int[]){1}, color.g / 255.0);
-        Tensor_set(&resultColor, (int[]){2}, color.b / 255.0);
+        Tensor *resultColor = Tensor_create(1, (int[]){3});
+        Tensor_set(resultColor, (int[]){0}, color.r / 255.0);
+        Tensor_set(resultColor, (int[]){1}, color.g / 255.0);
+        Tensor_set(resultColor, (int[]){2}, color.b / 255.0);
+        Tensor_free(&angle);
+        Tensor_free(&texCoord);
         return resultColor;
+    }
+    Tensor_free(&cameraPosition);
+    Tensor_free(&modifiedRay);
+    Tensor_free(&rayDirection);
+    for (int i = 0; i < 4; ++i) {
+        Tensor_free(&tetrads.v[i]);
     }
 }
 
 static UNUSED Tensor *getPixel(int width, int height,
                                SDL_Surface *imgBackground) {
     Background background = extractPixels(imgBackground);
-    Tensor *result = Tensor_create(2, (int[]){height, width, 3});
+    Tensor *result = Tensor_create(2, (int[]){height * width, 3});
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             Tensor renderedPixel =
-                renderPixel(x, y, width, height, &background);
+                *renderPixel(x, y, width, height, &background);
             for (int c = 0; c < 3; ++c) {
-                Tensor_set(result, (int[]){y, x, c},
+                Tensor_set(result, (int[]){(y * width + x), c},
                            Tensor_get(&renderedPixel, (int[]){c}));
             }
             Tensor_free(&renderedPixel);
         }
     }
+    Tensor_print(result);
+
     free(background.pixels);
     return result;
 }

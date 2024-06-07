@@ -25,15 +25,17 @@ static Geodesic UNUSED makeLightlikeGeodesic(Tensor pos, Tensor dir,
     Tensor_add_inplace(resultV, y_v);
     Tensor_add_inplace(resultV, z_v);
 
-    Geodesic result;
-    result.position = pos;
-    result.velocity = *resultV;
-
     Tensor_free(normalizeDir);
     Tensor_free(t_v);
     Tensor_free(x_v);
     Tensor_free(y_v);
     Tensor_free(z_v);
+
+    Geodesic result;
+    result.position = pos;
+    result.velocity = *resultV;
+
+    Tensor_free(resultV);
 
     return result;
 }

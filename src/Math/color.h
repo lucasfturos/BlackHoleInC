@@ -22,13 +22,13 @@ static Pixel UNUSED background_getPixel(Background *background, int x, int y) {
     return background->pixels[y * background->width + x];
 }
 
-static Background extractPixels(SDL_Surface *imgBackground) {
-    Background background;
-    background.width = imgBackground->w;
-    background.height = imgBackground->h;
-    background.pixels =
-        (Pixel *)malloc(background.width * background.height * sizeof(Pixel));
-    return background;
+static Background UNUSED extractPixels(SDL_Surface *imgBackground) {
+    return (Background){
+        .width = imgBackground->w,
+        .height = imgBackground->h,
+        .pixels = (Pixel *)malloc(imgBackground->w * imgBackground->h *
+                                  sizeof(Pixel *)),
+    };
 }
 
 //! Function to convert from CIE XYZ color space to RGB color space
