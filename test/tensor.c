@@ -404,5 +404,7 @@ int run_all_tests_tensor() {
     test_tensor_det();
     test_tensor_normalize();
 
+    printf("All Tensor tests passed.\n");
+
     return 0;
 }

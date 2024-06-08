@@ -219,5 +219,8 @@ int run_all_tests_mat4() {
     test_Mat4_mul_vec4();
     test_Mat4_normalize();
     test_Mat4_adjugate();
+
+    printf("All Mat4 tests passed.\n");
+
     return 0;
 }
