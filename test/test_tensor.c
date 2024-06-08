@@ -390,6 +390,7 @@ int main() {
     test_tensor_set_get();
     test_tensor_add();
     test_tensor_sub();
+    test_tensor_mul();
     test_tensor_mul_scalar();
     test_tensor_div_scalar();
     test_tensor_sumElements();
@@ -403,7 +404,6 @@ int main() {
     test_tensor_det3x3();
     test_tensor_det();
     test_tensor_normalize();
-    test_tensor_mul();
 
     printf("All tests passed.\n");
     return 0;
