@@ -216,17 +216,27 @@ static inline Tensor *Tensor_sub(Tensor *t1, Tensor *t2) {
 }
 
 static inline Tensor *Tensor_mul(Tensor *t1, Tensor *t2) {
-    assert(t1 && t2 && "Invalid tensor.");
-    assert(t1->num_dims == 1 && t2->num_dims == 1 &&
-           "The tensors must have the same dimensions for the operation of "
-           "product.");
-    int rows = t1->dims[0];
-    int cols = t2->dims[0];
-    int dims[] = {rows, cols};
+    assert(t1->num_dims == 2 && t2->num_dims == 2 &&
+           "Both tensors must be two-dimensional for matrix multiplication.");
+    assert(t1->dims[1] == t2->dims[0] &&
+           "The number of columns of the first matrix must be equal to the "
+           "number of rows of the second matrix.");
+
+    int m = t1->dims[0];
+    int n = t1->dims[1];
+    int p = t2->dims[1];
+
+    int dims[2] = {m, p};
     Tensor *result = Tensor_create(2, dims);
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            result->data[i * cols + j] = t1->data[i] * t2->data[j];
+
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < p; ++j) {
+            double sum = 0.0;
+            for (int k = 0; k < n; ++k) {
+                sum += Tensor_get(t1, (int[]){i, k}) *
+                       Tensor_get(t2, (int[]){k, j});
+            }
+            Tensor_set(result, (int[]){i, j}, sum);
         }
     }
     return result;
@@ -254,9 +264,6 @@ static inline Tensor *Tensor_div(Tensor *t1, Tensor *t2) {
 
 static inline Tensor *Tensor_mul_scalar(Tensor *t, double scalar) {
     assert(t && "Invalid tensor.");
-    assert(t->num_dims == 1 &&
-           "The tensors must have the same dimensions for the operation of "
-           "product.");
     int total_elements = 1;
     for (int i = 0; i < t->num_dims; ++i) {
         total_elements *= t->dims[i];
@@ -388,8 +395,8 @@ static inline Tensor *Tensor_inverse2x2(Tensor *t) {
 //     assert(t1->num_dims == 2 && t2->num_dims == 2 &&
 //            "Matrix multiplication is only supported for 2D tensors.");
 //     assert(t1->dims[1] == t2->dims[0] &&
-//            "The number of columns of the first matrix must equal the number of "
-//            "rows of the second matrix.");
+//            "The number of columns of the first matrix must equal the number
+//            of " "rows of the second matrix.");
 
 //     int rows = t1->dims[0];
 //     int cols = t2->dims[1];

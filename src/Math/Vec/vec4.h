@@ -54,7 +54,7 @@ static inline Vec4 Vec4_div_scalar(Vec4 v, double scalar) {
 }
 
 static inline Vec4 Vec4_fract(Vec4 v) {
-    return Vec4_create(fract(v.x), fract(v.y), fract(v.z), fract(v.z));
+    return Vec4_create(fract(v.x), fract(v.y), fract(v.z), fract(v.w));
 }
 
 static inline Vec4 Vec4_clamp(Vec4 v, double min, double max) {

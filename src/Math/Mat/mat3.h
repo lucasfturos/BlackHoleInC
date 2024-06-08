@@ -72,11 +72,4 @@ static inline Mat3 Mat3_normalize(Mat3 m) {
     return Mat3_div_scalar(m, len);
 }
 
-static inline Mat3 Mat3_rotational(Vec3 lookFrom, Vec3 lookAt, Vec3 vup) {
-    Vec3 w = Vec3_normalize(Vec3_sub(lookFrom, lookAt));
-    Vec3 u = Vec3_normalize(Vec3_cross(vup, w));
-    Vec3 v = Vec3_cross(w, u);
-    return Mat3_create(u, v, w);
-}
-
 #endif //! MAT3_H

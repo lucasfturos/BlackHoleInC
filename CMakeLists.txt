@@ -25,7 +25,9 @@ add_compile_options(
     -Wall -Wextra -Wpedantic -Werror -pedantic -g
 )
 
+include(CTest)
 add_subdirectory(test)
+
 add_subdirectory(src)
 
 # -------------------------------------------------------------------

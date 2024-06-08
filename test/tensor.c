@@ -1,6 +1,4 @@
 #include "../src/Math/tensor.h"
-#include <assert.h>
-#include <stdio.h>
 
 void test_tensor_create() {
     int dims[2] = {3, 3};
@@ -91,14 +89,15 @@ void test_tensor_mul_scalar() {
     Tensor_set(t, (int[]){1, 0}, 3.0);
     Tensor_set(t, (int[]){1, 1}, 4.0);
 
-    Tensor_mul_scalar(t, 2.0);
+    Tensor *result = Tensor_mul_scalar(t, 2.0);
 
-    assert(Tensor_get(t, (int[]){0, 0}) == 2.0);
-    assert(Tensor_get(t, (int[]){0, 1}) == 4.0);
-    assert(Tensor_get(t, (int[]){1, 0}) == 6.0);
-    assert(Tensor_get(t, (int[]){1, 1}) == 8.0);
+    assert(Tensor_get(result, (int[]){0, 0}) == 2.0);
+    assert(Tensor_get(result, (int[]){0, 1}) == 4.0);
+    assert(Tensor_get(result, (int[]){1, 0}) == 6.0);
+    assert(Tensor_get(result, (int[]){1, 1}) == 8.0);
 
     Tensor_free(t);
+    Tensor_free(result);
 
     printf("test_tensor_mul_scalar passed.\n");
 }
@@ -385,7 +384,7 @@ void test_tensor_mul() {
     printf("test_tensor_mul passed.\n");
 }
 
-int main() {
+int run_all_tests_tensor() {
     test_tensor_create();
     test_tensor_set_get();
     test_tensor_add();
@@ -405,6 +404,5 @@ int main() {
     test_tensor_det();
     test_tensor_normalize();
 
-    printf("All tests passed.\n");
     return 0;
 }
