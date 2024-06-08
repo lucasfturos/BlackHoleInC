@@ -1,7 +1,7 @@
 #ifndef RUN_H
 #define RUN_H
 
-#include "../Math/blackhole.h"
+#include "../BlackHole/blackhole1.h"
 #include <time.h>
 #include <unistd.h>
 
@@ -32,9 +32,9 @@ static void render_frame() {
     printf("\033c");
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            Vec2 fragCoord = Vec2_create(x, y);
-            Vec2 uv = Vec2_create(2.0 * (fragCoord.x / screenSize.x - 0.5),
-                                  2.0 * (fragCoord.y / screenSize.y - 0.5));
+            Vec2 coord = Vec2_create(x, y);
+            Vec2 uv = Vec2_create(2.0 * (coord.x / screenSize.x - 0.5),
+                                  2.0 * (coord.y / screenSize.y - 0.5));
             Vec3 rd = Vec3_normalize(
                 Vec3_add(Vec3_add(Vec3_mul_scalar(rotmat.v[0], uv.x * camfov),
                                   Vec3_mul_scalar(rotmat.v[1], uv.y * camfov)),

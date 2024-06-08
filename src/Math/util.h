@@ -4,21 +4,21 @@
 #include "Vec/vec3.h"
 #include "tensor.h"
 
-static Vec3 UNUSED toCartesian(double rho, double phi, double theta) {
+static inline Vec3 toCartesian(double rho, double phi, double theta) {
     double sinTheta = sin(theta);
     return Vec3_mul_scalar(
         Vec3_create(sinTheta * cos(phi), sinTheta * sin(phi), cos(theta)), rho);
 }
 
-static void UNUSED toSpherical(Vec3 xyz, double *rho, double *phi,
+static inline void toSpherical(Vec3 xyz, double *rho, double *phi,
                                double *theta) {
     *rho = Vec3_length(xyz);
     *phi = atan2(xyz.y, xyz.x);
     *theta = acos(xyz.z / *rho);
 }
 
-static Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
-                                 int dir) {
+static inline Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
+                                        int dir) {
     assert(func && "Invalid function pointer.");
     assert(pos && "Invalid position tensor.");
     assert(dir >= 0 && dir < pos->dims[0] && "Invalid direction.");
@@ -45,7 +45,7 @@ static Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
     return result;
 }
 
-static Tensor UNUSED angleToTex(const Tensor *angle) {
+static inline Tensor angleToTex(Tensor *angle) {
     assert(angle != NULL);
 
     double theta = fmod(angle->data[0], 2 * M_PI);

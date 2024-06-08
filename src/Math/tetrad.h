@@ -7,7 +7,7 @@ typedef struct {
     Tensor v[4];
 } Tetrad;
 
-static Tetrad UNUSED calculateSchwarzschildTetrad(Tensor pos) {
+static Tetrad calculateSchwarzschildTetrad(Tensor pos) {
     double r = Tensor_get(&pos, (int[]){1});
     double theta = Tensor_get(&pos, (int[]){2});
     assert(r > RS);

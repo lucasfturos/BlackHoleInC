@@ -8,7 +8,7 @@
 
 const double particleRadius = 2.5;
 
-static void UNUSED render1(SDL_Renderer *ren) {
+static inline void render1(SDL_Renderer *ren) {
     Vec3 camera = Vec3_create(0.0, 0.2, -3.5);
     // Vec3 camera = Vec3_create(0.0, 0.4, -3.0);
     double vfov = 2.6;
@@ -44,26 +44,20 @@ static void UNUSED render1(SDL_Renderer *ren) {
     }
 }
 
-static void UNUSED render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
+static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
     int imgWidth = imgBackground->w;
     int imgHeight = imgBackground->h;
-    Tensor *result = getPixel(WIDTH, HEIGHT, imgBackground);
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            int imgX = (int)((double)x / WIDTH * imgWidth);
-            int imgY = (int)((double)y / HEIGHT * imgHeight);
-            Tensor pixelColor = result[imgY * imgWidth + imgX];
-            Uint8 r = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){0}) * 255.0,
-                                   255.0));
-            Uint8 g = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){1}) * 255.0,
-                                   255.0));
-            Uint8 b = (Uint8)(fmin(Tensor_get(&pixelColor, (int[]){2}) * 255.0,
-                                   255.0));
-            SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawPoint(ren, x, y);
-        }
-    }
-    Tensor_free(result);
+    int x = 0, y = 0;
+    double *result = getPixel(&x, &y, WIDTH, HEIGHT, imgBackground);
+    int imgX = x / WIDTH * imgWidth;
+    int imgY = y / HEIGHT * imgHeight;
+    Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
+    Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
+    Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
+    Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
+    SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
+    SDL_RenderDrawPoint(ren, x, y);
+    // free(result);
 }
 
 #endif
