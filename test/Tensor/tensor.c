@@ -1,4 +1,5 @@
-#include "../src/Math/tensor.h"
+#include "../../src/Math/Tensor/tensor.h"
+
 
 void test_tensor_create() {
     int dims[2] = {3, 3};

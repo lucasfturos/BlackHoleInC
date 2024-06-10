@@ -1,8 +1,8 @@
 #ifndef BLACKHOLE2_H
 #define BLACKHOLE2_H
 
+#include "../Math/Tensor/geodesic.h"
 #include "../Math/color.h"
-#include "../Math/geodesic.h"
 #include "../Math/util.h"
 
 #define dt 0.3
@@ -193,9 +193,7 @@ static Tensor *renderPixel(int x, int y, int width, int height,
         Tensor_free(&cameraPosition);
         Tensor_free(&modifiedRay);
         Tensor_free(&rayDirection);
-        for (int i = 0; i < 4; ++i) {
-            Tensor_free(&tetrads.v[i]);
-        }
+        Tetrad_free(&tetrads);
         return resultColor;
     }
 
@@ -206,18 +204,17 @@ static Tensor *renderPixel(int x, int y, int width, int height,
     return black;
 }
 
-static double *getPixel(int *x, int *y, int width, int height,
-                        SDL_Surface *imgBackground) {
+static double *getPixel(int width, int height, SDL_Surface *imgBackground) {
     Background background = getBackgroudData(imgBackground);
     double *result = (double *)malloc(height * width * sizeof(double));
     assert(result != NULL && "Failed to allocate memory for result array.");
 
-    for (; *y < height; ++y) {
-        for (; *x < width; ++x) {
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
             Tensor *renderedPixel =
-                renderPixel(*x, *y, width, height, &background);
+                renderPixel(x, y, width, height, &background);
             for (int c = 0; c < 3; ++c) {
-                result[*y * width + *x] = renderedPixel->data[c];
+                result[y * width + x] = renderedPixel->data[c];
             }
             Tensor_free(renderedPixel);
         }

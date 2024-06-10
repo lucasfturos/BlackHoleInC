@@ -1,8 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include "Tensor/tensor.h"
 #include "Vec/vec3.h"
-#include "tensor.h"
 
 static inline Vec3 toCartesian(double rho, double phi, double theta) {
     double sinTheta = sin(theta);

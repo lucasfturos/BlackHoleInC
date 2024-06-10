@@ -1,7 +1,7 @@
 #ifndef GEODESIC_H
 #define GEODESIC_H
 
-#include "../Math/tetrad.h"
+#include "tetrad.h"
 
 typedef struct {
     Tensor position;
@@ -21,11 +21,11 @@ static Geodesic makeLightlikeGeodesic(Tensor pos, Tensor dir, Tetrad tetrad) {
     Tensor_add_inplace(resultV, y_v);
     Tensor_add_inplace(resultV, z_v);
 
-    // Tensor_free(normalizeDir);
-    // Tensor_free(t_v);
-    // Tensor_free(x_v);
-    // Tensor_free(y_v);
-    // Tensor_free(z_v);
+    Tensor_free(normalizeDir);
+    Tensor_free(t_v);
+    Tensor_free(x_v);
+    Tensor_free(y_v);
+    Tensor_free(z_v);
 
     Geodesic result;
     result.position = pos;

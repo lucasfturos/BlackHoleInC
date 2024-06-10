@@ -26,6 +26,7 @@ add_compile_options(
 )
 
 include(CTest)
+enable_testing()
 add_subdirectory(test)
 
 add_subdirectory(src)

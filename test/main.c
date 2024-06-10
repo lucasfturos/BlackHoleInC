@@ -11,7 +11,9 @@ int run_all_tests_mat3();
 int run_all_tests_mat4();
 
 // Tensor Library
+int run_all_tests_geodesic();
 int run_all_tests_tensor();
+int run_all_tests_tetrad();
 
 int main() {
     printf("Running Vec2 tests...\n");
@@ -29,8 +31,14 @@ int main() {
     printf("Running Mat4 tests...\n");
     run_all_tests_mat4();
 
+    printf("Running Geodesic tests...\n");
+    run_all_tests_geodesic();
+
     printf("Running Tensor tests...\n");
     run_all_tests_tensor();
+
+    printf("Running Tetrad tests...\n");
+    run_all_tests_tetrad();
 
     printf("All tests passed and completed.\n");
     return 0;

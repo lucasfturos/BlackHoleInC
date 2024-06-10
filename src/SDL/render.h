@@ -47,17 +47,21 @@ static inline void render1(SDL_Renderer *ren) {
 static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
     int imgWidth = imgBackground->w;
     int imgHeight = imgBackground->h;
-    int x = 0, y = 0;
-    double *result = getPixel(&x, &y, WIDTH, HEIGHT, imgBackground);
-    int imgX = x / WIDTH * imgWidth;
-    int imgY = y / HEIGHT * imgHeight;
-    Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
-    Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
-    Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
-    Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
-    SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
-    SDL_RenderDrawPoint(ren, x, y);
-    // free(result);
+    double *result = getPixel(WIDTH, HEIGHT, imgBackground);
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            int imgX = x / WIDTH * imgWidth;
+            int imgY = y / HEIGHT * imgHeight;
+            Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
+            Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
+            Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
+            Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
+            SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawPoint(ren, x, y);
+        }
+    }
+    
+    free(result);
 }
 
 #endif
