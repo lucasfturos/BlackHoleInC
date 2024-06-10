@@ -6,7 +6,7 @@
 #include "init.h"
 #include "objects.h"
 
-const double particleRadius = 2.5;
+const double particleRadius = 2.0;
 
 static inline void render1(SDL_Renderer *ren) {
     Vec3 camera = Vec3_create(0.0, 0.2, -3.5);
@@ -47,6 +47,50 @@ static inline void render1(SDL_Renderer *ren) {
 static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
     int imgWidth = imgBackground->w;
     int imgHeight = imgBackground->h;
+    Uint32 *pixels = (Uint32 *)imgBackground->pixels;
+    SDL_PixelFormat *format = imgBackground->format;
+
+    Vec3 camera = Vec3_create(0.0, 0.15, -3.5);
+    double vfov = 3.6;
+    Mat3 world = Mat3_normalize(Mat3_create(Vec3_create(1.0, -0.2, 0.0),
+                                            Vec3_create(0.2, 1.0, 0.0),
+                                            Vec3_create(0.0, -0.1, 1.0)));
+
+    const double samplePercentage = 0.05;
+    const int numSamples = (int)(imgWidth * imgHeight * samplePercentage);
+
+    for (int i = 0; i < numSamples; ++i) {
+        int x = random_range(0, WIDTH - 1);
+        int y = random_range(0, HEIGHT - 1);
+
+        int imgX = (int)((double)x / WIDTH * imgWidth);
+        int imgY = (int)((double)y / HEIGHT * imgHeight);
+
+        Uint32 pixel = pixels[imgY * imgWidth + imgX];
+        Uint8 r, g, b;
+        SDL_GetRGB(pixel, format, &r, &g, &b);
+
+        Vec2 uv =
+            Vec2_create((double)x / WIDTH - 0.5, (double)y / HEIGHT - 0.5);
+        Vec3 rd = Vec3_normalize(
+            Vec3_add(Vec3_add(Vec3_mul_scalar(world.v[0], uv.x * vfov),
+                              Vec3_mul_scalar(world.v[1], uv.y * vfov)),
+                     world.v[2]));
+
+        Vec3 colorRadiance = radiance(camera, rd);
+        Uint8 newR = (0.5 * r + 0.5 * fmin(colorRadiance.x * 0xFF, 0xFF));
+        Uint8 newG = (0.5 * g + 0.5 * fmin(colorRadiance.y * 0xFF, 0xFF));
+        Uint8 newB = (0.5 * b + 0.5 * fmin(colorRadiance.z * 0xFF, 0xFF));
+
+        double invertedY = HEIGHT - 1 - y;
+        SDL_SetRenderDrawColor(ren, newR, newG, newB, SDL_ALPHA_OPAQUE);
+        SDL_RenderDrawPoint(ren, x, invertedY);
+    }
+}
+
+static inline void render3(SDL_Renderer *ren, SDL_Surface *imgBackground) {
+    int imgWidth = imgBackground->w;
+    int imgHeight = imgBackground->h;
     double *result = getPixel(WIDTH, HEIGHT, imgBackground);
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -60,8 +104,8 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
             SDL_RenderDrawPoint(ren, x, y);
         }
     }
-    
+
     free(result);
 }
 
-#endif
+#endif //! RENDER_H

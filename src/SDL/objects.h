@@ -4,7 +4,7 @@
 #include "../Math/Vec/vec2.h"
 #include <SDL2/SDL.h>
 
-static void drawCircle(SDL_Renderer *ren, double x, double y, int radius,
+static inline void drawCircle(SDL_Renderer *ren, double x, double y, int radius,
                        SDL_Color color) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
     for (int w = 0; w < radius * 2; ++w) {

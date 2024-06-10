@@ -10,6 +10,10 @@
 #define RS 0.5
 #define EPS 1.0e-6
 
+static inline int random_range(int min, int max) {
+    return rand() % (max - min + 1) + min;
+}
+
 static inline double random_double() { return (double)rand() / (1 * RAND_MAX); }
 
 static inline double mix(double a, double b, double t) {

@@ -6,7 +6,7 @@
 #include "Vec/vec4.h"
 
 //! Gaussian noise generation using Box-Muller transform with precomputed values
-static double gaussianNoise(double mu, double sigma) {
+static inline double gaussianNoise(double mu, double sigma) {
     static const double two_pi = 2.0 * M_PI;
     static Vec2 z;
     static int gen;

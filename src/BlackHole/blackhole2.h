@@ -5,7 +5,7 @@
 #include "../Math/color.h"
 #include "../Math/util.h"
 
-#define dt 0.3
+#define DT 0.3
 
 enum HitType {
     ESCAPED,
@@ -132,7 +132,7 @@ static IntegrationResult integrate(Geodesic *g) {
         Tensor acceleration =
             *calculateSchwarzschildAcceleration(&g->position, &g->velocity);
         Tensor_add_inplace(&g->velocity, &acceleration);
-        Tensor_add_inplace(&g->position, Tensor_mul_scalar(&g->velocity, dt));
+        Tensor_add_inplace(&g->position, Tensor_mul_scalar(&g->velocity, DT));
 
         double radius = g->position.data[1];
         if (radius > 10) {

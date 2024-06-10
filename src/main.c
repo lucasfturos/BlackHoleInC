@@ -6,7 +6,7 @@ int main() {
     Resources res;
     initWindow(&res);
 
-    const char *filename = "assets/nasa.png";
+    const char *filename = "assets/nasa_resize.png";
     SDL_Surface *imageBackgroud = uploadImage(filename);
     if (imageBackgroud == NULL) {
         fprintf(stderr, "Failed to load image %s\n", filename);
