@@ -31,6 +31,7 @@ static Tensor *schwarzschildMetric(Tensor *pos) {
     Tensor_set(metric, (int[]){1, 1}, 1 / (1 - RS / r));
     Tensor_set(metric, (int[]){2, 2}, r * r);
     Tensor_set(metric, (int[]){3, 3}, r * r * sin(theta) * sin(theta));
+    
     return metric;
 }
 
@@ -42,15 +43,11 @@ static Tensor getRayThroughPixel(int sx, int sy, int width, int height,
     double fovRad = (fovDegrees / 360.f) * 2 * M_PI;
     double fovStop = (width / 2.0) / tan(fovRad / 2);
 
-    Tensor *pixelDir = Tensor_create(1, (int[]){3});
-    assert(pixelDir && "Failed to allocate memory for pixelDir tensor.");
-    Tensor_set(pixelDir, (int[]){0}, (sx - width / 2.0) / width);
-    Tensor_set(pixelDir, (int[]){1}, (sy - height / 2.0) / width);
-    Tensor_set(pixelDir, (int[]){2}, -fovStop / width);
-
-    Tensor result = *Tensor_normalize(pixelDir);
-    // Tensor_free(pixelDir);
-    return result;
+    Tensor result = *Tensor_create(1, (int[]){3});
+    Tensor_set(&result, (int[]){0}, (sx - width / 2.0) / width);
+    Tensor_set(&result, (int[]){1}, (sy - height / 2.0) / width);
+    Tensor_set(&result, (int[]){2}, -fovStop / width);
+    return *Tensor_normalize(&result);
 }
 
 static Tensor *calculateChristoff2(Tensor *position,
@@ -67,7 +64,7 @@ static Tensor *calculateChristoff2(Tensor *position,
                            Tensor_get(&differentiated, (int[]){j, k}));
             }
         }
-        // Tensor_free(&differentiated);
+        Tensor_free(&differentiated);
     }
 
     Tensor *Gamma = Tensor_create(3, (int[]){4, 4, 4});
@@ -91,29 +88,28 @@ static Tensor *calculateChristoff2(Tensor *position,
         }
     }
 
-    // Tensor_free(metric);
-    // Tensor_free(metric_inverse);
-    // Tensor_free(metric_diff);
+    Tensor_free(metric);
+    Tensor_free(metric_inverse);
+    Tensor_free(metric_diff);
 
     return Gamma;
 }
 
 static Tensor *calculateAccelerationOf(Tensor *X, Tensor *v,
                                        Tensor *(*get_metric)(Tensor *)) {
-    Tensor *christoff2 = calculateChristoff2(X, get_metric);
-    assert(christoff2 && "Failed to calculate Christoff2 tensor.");
+    Tensor christoff2 = *calculateChristoff2(X, get_metric);
     Tensor *acceleration = Tensor_create(1, (int[]){4});
     for (int mu = 0; mu < 4; ++mu) {
         double sum = 0;
         for (int al = 0; al < 4; ++al) {
             for (int be = 0; be < 4; ++be) {
-                sum += -Tensor_get(christoff2, (int[]){mu, al, be}) *
+                sum += -Tensor_get(&christoff2, (int[]){mu, al, be}) *
                        v->data[al] * v->data[be];
             }
         }
         Tensor_set(acceleration, (int[]){mu}, sum);
     }
-    // Tensor_free(christoff2);
+    Tensor_free(&christoff2);
     return acceleration;
 }
 
@@ -143,7 +139,7 @@ static IntegrationResult integrate(Geodesic *g) {
             result.type = EVENT_HORIZON;
             return result;
         }
-        // Tensor_free(&acceleration);
+        Tensor_free(&acceleration);
     }
     return result;
 }
@@ -169,7 +165,13 @@ static Tensor *renderPixel(int x, int y, int width, int height,
         makeLightlikeGeodesic(cameraPosition, modifiedRay, tetrads);
 
     IntegrationResult result = integrate(&geodesic);
-    if (result.type != EVENT_HORIZON || result.type != UNFINISHED) {
+    if (result.type == EVENT_HORIZON || result.type == UNFINISHED) {
+        Tensor *black = Tensor_create(1, (int[]){3});
+        Tensor_set(black, (int[]){0}, 0);
+        Tensor_set(black, (int[]){1}, 0);
+        Tensor_set(black, (int[]){2}, 0);
+        return black;
+    } else {
         double theta = geodesic.position.data[2];
         double phi = geodesic.position.data[3];
 
@@ -189,26 +191,15 @@ static Tensor *renderPixel(int x, int y, int width, int height,
         Tensor_set(resultColor, (int[]){1}, color.g / 255.0);
         Tensor_set(resultColor, (int[]){2}, color.b / 255.0);
 
-        // Tensor_free(&angle);
-        // Tensor_free(&texCoord);
-        // Tensor_free(&cameraPosition);
-        // Tensor_free(&modifiedRay);
-        // Tensor_free(&rayDirection);
-        // Tetrad_free(&tetrads);
+        Tensor_free(&angle);
+        Tensor_free(&texCoord);
 
         return resultColor;
     }
-
-    // Tensor_free(&cameraPosition);
-    // Tensor_free(&modifiedRay);
-    // Tensor_free(&rayDirection);
-    // Tetrad_free(&tetrads);
-
-    Tensor *black = Tensor_create(1, (int[]){3});
-    Tensor_set(black, (int[]){0}, 0);
-    Tensor_set(black, (int[]){1}, 0);
-    Tensor_set(black, (int[]){2}, 0);
-    return black;
+    Tensor_free(&cameraPosition);
+    Tensor_free(&modifiedRay);
+    Tensor_free(&rayDirection);
+    Tetrad_free(&tetrads);
 }
 
 static inline double *getPixel(int width, int height,
@@ -224,10 +215,10 @@ static inline double *getPixel(int width, int height,
             for (int c = 0; c < 3; ++c) {
                 result[y * width + x] = renderedPixel->data[c];
             }
-            // Tensor_free(renderedPixel);
+            Tensor_free(renderedPixel);
         }
     }
-    // free(background.pixels);
+    free(background.pixels);
 
     // for (int i = 0; i < height * width; ++i) {
     //     printf("(%d, %d, %d) ", (int)(result[i * 3] * 255),

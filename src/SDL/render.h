@@ -63,8 +63,8 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
         int x = random_range(0, WIDTH - 1);
         int y = random_range(0, HEIGHT - 1);
 
-        int imgX = (int)((double)x / WIDTH * imgWidth);
-        int imgY = (int)((double)y / HEIGHT * imgHeight);
+        int imgX = (int)(x / WIDTH * imgWidth);
+        int imgY = (int)(y / HEIGHT * imgHeight);
 
         Uint32 pixel = pixels[imgY * imgWidth + imgX];
         Uint8 r, g, b;
@@ -91,20 +91,23 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
 static inline void render3(SDL_Renderer *ren, SDL_Surface *imgBackground) {
     int imgWidth = imgBackground->w;
     int imgHeight = imgBackground->h;
-    double *result = getPixel(WIDTH, HEIGHT, imgBackground);
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            int imgX = x / WIDTH * imgWidth;
-            int imgY = y / HEIGHT * imgHeight;
-            Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
-            Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
-            Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
-            Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
-            SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawPoint(ren, x, y);
-        }
-    }
+    const double samplePercentage = 0.05;
+    const int numSamples = (int)(imgWidth * imgHeight * samplePercentage);
 
+    double *result = getPixel(imgWidth, imgHeight, imgBackground);
+    for (int i = 0; i < numSamples; ++i) {
+        int x = random_range(0, WIDTH - 1);
+        int y = random_range(0, HEIGHT - 1);
+        int imgX = (int)(x / WIDTH * imgWidth);
+        int imgY = (int)(y / HEIGHT * imgHeight);
+
+        Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
+        Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
+        Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
+        Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
+        SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
+        SDL_RenderDrawPoint(ren, imgX, imgY);
+    }
     free(result);
 }
 

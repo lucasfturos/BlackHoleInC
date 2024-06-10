@@ -31,7 +31,7 @@ int main() {
         SDL_SetRenderDrawColor(res.ren, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(res.ren);
 
-        render2(res.ren, imageBackgroud);
+        render3(res.ren, imageBackgroud);
 
         SDL_RenderPresent(res.ren);
         SDL_Delay(1000 / FPS);
