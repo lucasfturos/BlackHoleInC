@@ -49,7 +49,7 @@ static Tensor getRayThroughPixel(int sx, int sy, int width, int height,
     Tensor_set(pixelDir, (int[]){2}, -fovStop / width);
 
     Tensor result = *Tensor_normalize(pixelDir);
-    Tensor_free(pixelDir);
+    // Tensor_free(pixelDir);
     return result;
 }
 
@@ -67,7 +67,7 @@ static Tensor *calculateChristoff2(Tensor *position,
                            Tensor_get(&differentiated, (int[]){j, k}));
             }
         }
-        Tensor_free(&differentiated);
+        // Tensor_free(&differentiated);
     }
 
     Tensor *Gamma = Tensor_create(3, (int[]){4, 4, 4});
@@ -91,9 +91,9 @@ static Tensor *calculateChristoff2(Tensor *position,
         }
     }
 
-    Tensor_free(metric);
-    Tensor_free(metric_inverse);
-    Tensor_free(metric_diff);
+    // Tensor_free(metric);
+    // Tensor_free(metric_inverse);
+    // Tensor_free(metric_diff);
 
     return Gamma;
 }
@@ -113,7 +113,7 @@ static Tensor *calculateAccelerationOf(Tensor *X, Tensor *v,
         }
         Tensor_set(acceleration, (int[]){mu}, sum);
     }
-    Tensor_free(christoff2);
+    // Tensor_free(christoff2);
     return acceleration;
 }
 
@@ -143,7 +143,7 @@ static IntegrationResult integrate(Geodesic *g) {
             result.type = EVENT_HORIZON;
             return result;
         }
-        Tensor_free(&acceleration);
+        // Tensor_free(&acceleration);
     }
     return result;
 }
@@ -188,14 +188,21 @@ static Tensor *renderPixel(int x, int y, int width, int height,
         Tensor_set(resultColor, (int[]){0}, color.r / 255.0);
         Tensor_set(resultColor, (int[]){1}, color.g / 255.0);
         Tensor_set(resultColor, (int[]){2}, color.b / 255.0);
-        Tensor_free(&angle);
-        Tensor_free(&texCoord);
-        Tensor_free(&cameraPosition);
-        Tensor_free(&modifiedRay);
-        Tensor_free(&rayDirection);
-        Tetrad_free(&tetrads);
+
+        // Tensor_free(&angle);
+        // Tensor_free(&texCoord);
+        // Tensor_free(&cameraPosition);
+        // Tensor_free(&modifiedRay);
+        // Tensor_free(&rayDirection);
+        // Tetrad_free(&tetrads);
+
         return resultColor;
     }
+
+    // Tensor_free(&cameraPosition);
+    // Tensor_free(&modifiedRay);
+    // Tensor_free(&rayDirection);
+    // Tetrad_free(&tetrads);
 
     Tensor *black = Tensor_create(1, (int[]){3});
     Tensor_set(black, (int[]){0}, 0);
@@ -204,7 +211,8 @@ static Tensor *renderPixel(int x, int y, int width, int height,
     return black;
 }
 
-static double *getPixel(int width, int height, SDL_Surface *imgBackground) {
+static inline double *getPixel(int width, int height,
+                               SDL_Surface *imgBackground) {
     Background background = getBackgroudData(imgBackground);
     double *result = (double *)malloc(height * width * sizeof(double));
     assert(result != NULL && "Failed to allocate memory for result array.");
@@ -216,9 +224,10 @@ static double *getPixel(int width, int height, SDL_Surface *imgBackground) {
             for (int c = 0; c < 3; ++c) {
                 result[y * width + x] = renderedPixel->data[c];
             }
-            Tensor_free(renderedPixel);
+            // Tensor_free(renderedPixel);
         }
     }
+    // free(background.pixels);
 
     // for (int i = 0; i < height * width; ++i) {
     //     printf("(%d, %d, %d) ", (int)(result[i * 3] * 255),
@@ -229,7 +238,6 @@ static double *getPixel(int width, int height, SDL_Surface *imgBackground) {
     //     }
     // }
 
-    free(background.pixels);
     return result;
 }
 

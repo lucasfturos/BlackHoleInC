@@ -1,10 +1,9 @@
 #include <stdio.h>
 
 // Declaration of test functions
-// Vector Library
-int run_all_tests_vec2();
-int run_all_tests_vec3();
-int run_all_tests_vec4();
+
+// Black Hole Library
+int run_all_tests_blackhole2();
 
 // Matrix Library
 int run_all_tests_mat3();
@@ -15,15 +14,14 @@ int run_all_tests_geodesic();
 int run_all_tests_tensor();
 int run_all_tests_tetrad();
 
+// Vector Library
+int run_all_tests_vec2();
+int run_all_tests_vec3();
+int run_all_tests_vec4();
+
 int main() {
-    printf("Running Vec2 tests...\n");
-    run_all_tests_vec2();
-
-    printf("Running Vec3 tests...\n");
-    run_all_tests_vec3();
-
-    printf("Running Vec4 tests...\n");
-    run_all_tests_vec4();
+    printf("Running BlackHole tests...\n");
+    run_all_tests_blackhole2();
 
     printf("Running Mat3 tests...\n");
     run_all_tests_mat3();
@@ -39,6 +37,15 @@ int main() {
 
     printf("Running Tetrad tests...\n");
     run_all_tests_tetrad();
+
+    printf("Running Vec2 tests...\n");
+    run_all_tests_vec2();
+
+    printf("Running Vec3 tests...\n");
+    run_all_tests_vec3();
+
+    printf("Running Vec4 tests...\n");
+    run_all_tests_vec4();
 
     printf("All tests passed and completed.\n");
     return 0;

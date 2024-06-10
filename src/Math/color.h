@@ -16,7 +16,7 @@ typedef struct {
     Pixel *pixels;
 } Background;
 
-static Background getBackgroudData(SDL_Surface *imgBackground) {
+static inline Background getBackgroudData(SDL_Surface *imgBackground) {
     return (Background){
         .width = imgBackground->w,
         .height = imgBackground->h,
@@ -26,7 +26,7 @@ static Background getBackgroudData(SDL_Surface *imgBackground) {
 }
 
 //! Function to convert from CIE XYZ color space to RGB color space
-static Vec3 XYZtoRGB(Vec3 XYZ) {
+static inline Vec3 XYZtoRGB(Vec3 XYZ) {
     const Mat3 XYZ2sRGB = Mat3_create(Vec3_create(3.240, -1.537, -0.499),
                                       Vec3_create(-0.969, 1.876, 0.042),
                                       Vec3_create(0.056, -0.204, 1.057));
@@ -35,7 +35,7 @@ static Vec3 XYZtoRGB(Vec3 XYZ) {
 
 //! Function to calculate the XYZ color corresponding to a blackbody at
 //! temperature t
-static Vec3 colorBlackBodyXYZ(double t) {
+static inline Vec3 colorBlackBodyXYZ(double t) {
     double u = (0.860117757 + 1.54118254E-4 * t + 1.28641212E-7 * t * t) /
                (1.0 + 8.42420235E-4 * t + 7.08145163E-7 * t * t);
     double v = (0.317398726 + 4.22806245E-5 * t + 4.20481691E-8 * t * t) /
@@ -46,4 +46,4 @@ static Vec3 colorBlackBodyXYZ(double t) {
     return Vec3_create(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y);
 }
 
-#endif
+#endif //! COLOR_H

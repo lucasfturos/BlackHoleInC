@@ -25,22 +25,22 @@ static inline Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
 
     Tensor p_up = *Tensor_copy(pos);
     Tensor p_lo = *Tensor_copy(pos);
-    Tensor_set(&p_up, (int[]){dir}, Tensor_get(pos, (int[]){dir}) + EPS);
-    Tensor_set(&p_lo, (int[]){dir}, Tensor_get(pos, (int[]){dir}) - EPS);
+    Tensor_set(&p_up, (int[]){dir}, pos->data[dir] + EPS);
+    Tensor_set(&p_lo, (int[]){dir}, pos->data[dir] - EPS);
 
-    Tensor *up = (*func)(&p_up);
-    Tensor *lo = (*func)(&p_lo);
-    Tensor *diff = Tensor_sub(up, lo);
+    Tensor up = *(*func)(&p_up);
+    Tensor lo = *(*func)(&p_lo);
+    Tensor diff = *Tensor_sub(&up, &lo);
 
     double scalar = 1 / (2.0 * EPS);
-    Tensor *result = Tensor_create(diff->num_dims, diff->dims);
-    for (int i = 0; i < diff->num_dims; ++i) {
-        result->data[i] = diff->data[i] * scalar;
+    Tensor *result = Tensor_create(diff.num_dims, diff.dims);
+    for (int i = 0; i < diff.num_dims; ++i) {
+        result->data[i] = diff.data[i] * scalar;
     }
 
-    Tensor_free(up);
-    Tensor_free(lo);
-    Tensor_free(diff);
+    Tensor_free(&up);
+    Tensor_free(&lo);
+    Tensor_free(&diff);
 
     return result;
 }
