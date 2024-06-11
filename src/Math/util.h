@@ -38,6 +38,8 @@ static inline Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
         result->data[i] = diff.data[i] * scalar;
     }
 
+    Tensor_free(&p_up);
+    Tensor_free(&p_lo);
     Tensor_free(&up);
     Tensor_free(&lo);
     Tensor_free(&diff);

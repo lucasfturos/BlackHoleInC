@@ -19,7 +19,6 @@ typedef struct {
 
 static Tensor *schwarzschildMetric(Tensor *pos) {
     assert(pos && "Invalid position tensor.");
-
     double r = pos->data[1];
     double theta = pos->data[2];
     assert(r > RS);
@@ -31,7 +30,7 @@ static Tensor *schwarzschildMetric(Tensor *pos) {
     Tensor_set(metric, (int[]){1, 1}, 1 / (1 - RS / r));
     Tensor_set(metric, (int[]){2, 2}, r * r);
     Tensor_set(metric, (int[]){3, 3}, r * r * sin(theta) * sin(theta));
-    
+
     return metric;
 }
 
@@ -57,14 +56,14 @@ static Tensor *calculateChristoff2(Tensor *position,
 
     Tensor *metric_diff = Tensor_create(3, (int[]){4, 4, 4});
     for (int i = 0; i < 4; ++i) {
-        Tensor differentiated = *partialDerivative(get_metric, position, i);
+        Tensor *differentiated = partialDerivative(get_metric, position, i);
         for (int j = 0; j < 4; ++j) {
             for (int k = 0; k < 4; ++k) {
                 Tensor_set(metric_diff, (int[]){i, j, k},
-                           Tensor_get(&differentiated, (int[]){j, k}));
+                           Tensor_get(differentiated, (int[]){j, k}));
             }
         }
-        Tensor_free(&differentiated);
+        Tensor_free(differentiated);
     }
 
     Tensor *Gamma = Tensor_create(3, (int[]){4, 4, 4});
@@ -198,7 +197,6 @@ static Tensor *renderPixel(int x, int y, int width, int height,
     }
     Tensor_free(&cameraPosition);
     Tensor_free(&modifiedRay);
-    Tensor_free(&rayDirection);
     Tetrad_free(&tetrads);
 }
 
