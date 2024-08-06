@@ -17,37 +17,35 @@ static inline void toSpherical(Vec3 xyz, double *rho, double *phi,
     *theta = acos(xyz.z / *rho);
 }
 
-static inline Tensor *partialDerivative(Tensor *(*func)(Tensor *), Tensor *pos,
-                                        int dir) {
-    assert(func && "Invalid function pointer.");
-    assert(pos && "Invalid position tensor.");
-    assert(dir >= 0 && dir < pos->dims[0] && "Invalid direction.");
+static inline Tensor *partialDerivative(Tensor *(*get_metric)(Tensor *),
+                                        Tensor *position, int dimension) {
+    assert(dimension >= 0 && dimension < position->dims[0] &&
+           "Invalid dimension for partial derivative.");
 
-    Tensor p_up = *Tensor_copy(pos);
-    Tensor p_lo = *Tensor_copy(pos);
-    Tensor_set(&p_up, (int[]){dir}, pos->data[dir] + EPS);
-    Tensor_set(&p_lo, (int[]){dir}, pos->data[dir] - EPS);
+    double h = 1e-5;
 
-    Tensor up = *(*func)(&p_up);
-    Tensor lo = *(*func)(&p_lo);
-    Tensor diff = *Tensor_sub(&up, &lo);
+    Tensor *pos_plus_h = Tensor_copy(position);
+    Tensor *pos_minus_h = Tensor_copy(position);
 
-    double scalar = 1 / (2.0 * EPS);
-    Tensor *result = Tensor_create(diff.num_dims, diff.dims);
-    for (int i = 0; i < diff.num_dims; ++i) {
-        result->data[i] = diff.data[i] * scalar;
-    }
+    pos_plus_h->data[dimension] += h;
+    pos_minus_h->data[dimension] -= h;
 
-    Tensor_free(&p_up);
-    Tensor_free(&p_lo);
-    Tensor_free(&up);
-    Tensor_free(&lo);
-    Tensor_free(&diff);
+    Tensor *metric_plus_h = get_metric(pos_plus_h);
+    Tensor *metric_minus_h = get_metric(pos_minus_h);
 
-    return result;
+    Tensor *diff = Tensor_sub(metric_plus_h, metric_minus_h);
+    Tensor *derivative = Tensor_div_scalar(diff, 2.0 * h);
+
+    Tensor_free(pos_plus_h);
+    Tensor_free(pos_minus_h);
+    Tensor_free(metric_plus_h);
+    Tensor_free(metric_minus_h);
+    Tensor_free(diff);
+
+    return derivative;
 }
 
-static inline Tensor angleToTex(Tensor *angle) {
+static inline Tensor *angleToTex(Tensor *angle) {
     assert(angle != NULL);
 
     double theta = fmod(angle->data[0], 2 * M_PI);
@@ -62,9 +60,9 @@ static inline Tensor angleToTex(Tensor *angle) {
     double sy = theta / M_PI;
     sx += 0.5;
 
-    Tensor result = *Tensor_create(1, (int[]){2});
-    Tensor_set(&result, (int[]){0}, sx);
-    Tensor_set(&result, (int[]){1}, sy);
+    Tensor *result = Tensor_create(1, (int[]){2});
+    Tensor_set(result, (int[]){0}, sx);
+    Tensor_set(result, (int[]){1}, sy);
     return result;
 }
 

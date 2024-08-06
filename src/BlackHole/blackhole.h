@@ -1,5 +1,5 @@
-#ifndef BLACKHOLE1_H
-#define BLACKHOLE1_H
+#ifndef BLACKHOLE_H
+#define BLACKHOLE_H
 
 #include "../Math/color.h"
 #include "../Math/noise.h"
@@ -95,4 +95,4 @@ static Vec3 radiance(Vec3 ro, Vec3 rd) {
     return Vec3_create(-1.0, -1.0, -1.0);
 }
 
-#endif //! BLACKHOLE1_H
+#endif //! BLACKHOLE_H

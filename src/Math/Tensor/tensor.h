@@ -390,31 +390,6 @@ static inline Tensor *Tensor_inverse2x2(Tensor *t) {
     return result;
 }
 
-// static inline Tensor *Tensor_matrixMul(Tensor *t1, Tensor *t2) {
-//     assert(t1 && t2 && "Invalid tensor.");
-//     assert(t1->num_dims == 2 && t2->num_dims == 2 &&
-//            "Matrix multiplication is only supported for 2D tensors.");
-//     assert(t1->dims[1] == t2->dims[0] &&
-//            "The number of columns of the first matrix must equal the number
-//            of " "rows of the second matrix.");
-
-//     int rows = t1->dims[0];
-//     int cols = t2->dims[1];
-//     int common_dim = t1->dims[1];
-//     int dims[] = {rows, cols};
-//     Tensor *result = Tensor_create(2, dims);
-//     for (int i = 0; i < rows; ++i) {
-//         for (int j = 0; j < cols; ++j) {
-//             result->data[i * cols + j] = 0;
-//             for (int k = 0; k < common_dim; ++k) {
-//                 result->data[i * cols + j] +=
-//                     t1->data[i * common_dim + k] * t2->data[k * cols + j];
-//             }
-//         }
-//     }
-//     return result;
-// }
-
 static inline double Tensor_length(Tensor *t) {
     assert(t && "Invalid tensor.");
     assert(t->num_dims == 1 && "Length is only supported for 1D tensors.");

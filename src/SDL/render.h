@@ -1,8 +1,7 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "../BlackHole/blackhole1.h"
-#include "../BlackHole/blackhole2.h"
+#include "../BlackHole/blackhole.h"
 #include "init.h"
 #include "objects.h"
 
@@ -18,7 +17,7 @@ static inline void render1(SDL_Renderer *ren) {
     // Mat3 world = Mat3_normalize(Mat3_create(Vec3_create(1.0, 0.0, 0.0),
     //                                         Vec3_create(0.0, 1.0, 0.0),
     //                                         Vec3_create(0.0, 0.0, 1.0)));
-    for (int i = 0; i < 1000 * 3; ++i) {
+    for (int i = 0; i < 1000 * 4; ++i) {
         Position particle = {
             .x = gaussianNoise(WIDTH / 2.0, WIDTH / 5.0),
             .y = gaussianNoise(HEIGHT / 2.0, HEIGHT / 8.0),
@@ -37,7 +36,7 @@ static inline void render1(SDL_Renderer *ren) {
         Uint8 r = (Uint8)(fmin(color.x * 0xFF, 0xFF));
         Uint8 g = (Uint8)(fmin(color.y * 0xFF, 0xFF));
         Uint8 b = (Uint8)(fmin(color.z * 0xFF, 0xFF));
-        SDL_Color particleColor = {r, g, b, 0xFF};
+        SDL_Color particleColor = {r, g, b, SDL_ALPHA_OPAQUE};
 
         double invertedY = HEIGHT - 1 - particle.y;
         drawCircle(ren, particle.x, invertedY, particleRadius, particleColor);
@@ -56,15 +55,14 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
                                             Vec3_create(0.2, 1.0, 0.0),
                                             Vec3_create(0.0, -0.1, 1.0)));
 
-    const double samplePercentage = 0.05;
-    const int numSamples = (int)(imgWidth * imgHeight * samplePercentage);
-
+    const double samplePercentage = 1.0;
+    const int numSamples = (int)(WIDTH * HEIGHT * samplePercentage);
     for (int i = 0; i < numSamples; ++i) {
         int x = random_range(0, WIDTH - 1);
         int y = random_range(0, HEIGHT - 1);
 
-        int imgX = (int)(x / WIDTH * imgWidth);
-        int imgY = (int)(y / HEIGHT * imgHeight);
+        int imgX = (int)((double)x / WIDTH * imgWidth);
+        int imgY = (int)((double)y / HEIGHT * imgHeight);
 
         Uint32 pixel = pixels[imgY * imgWidth + imgX];
         Uint8 r, g, b;
@@ -86,29 +84,6 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
         SDL_SetRenderDrawColor(ren, newR, newG, newB, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawPoint(ren, x, invertedY);
     }
-}
-
-static inline void render3(SDL_Renderer *ren, SDL_Surface *imgBackground) {
-    int imgWidth = imgBackground->w;
-    int imgHeight = imgBackground->h;
-    const double samplePercentage = 0.05;
-    const int numSamples = (int)(imgWidth * imgHeight * samplePercentage);
-
-    double *result = getPixel(imgWidth, imgHeight, imgBackground);
-    for (int i = 0; i < numSamples; ++i) {
-        int x = random_range(0, WIDTH - 1);
-        int y = random_range(0, HEIGHT - 1);
-        int imgX = (int)(x / WIDTH * imgWidth);
-        int imgY = (int)(y / HEIGHT * imgHeight);
-
-        Uint8 pixelColor = (Uint8)(result[imgY * imgWidth + imgX]);
-        Uint8 r = (Uint8)((pixelColor >> 8 * 0) & 0xFF) / 0xFF;
-        Uint8 g = (Uint8)((pixelColor >> 8 * 1) & 0xFF) / 0xFF;
-        Uint8 b = (Uint8)((pixelColor >> 8 * 2) & 0xFF) / 0xFF;
-        SDL_SetRenderDrawColor(ren, r, g, b, SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawPoint(ren, imgX, imgY);
-    }
-    free(result);
 }
 
 #endif //! RENDER_H

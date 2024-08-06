@@ -12,11 +12,15 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} 
-    PRIVATE src
+    PRIVATE BlackHole
+    PRIVATE Math
+    PRIVATE Term
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
+    # Math
     PRIVATE m
+    # SDL2
     PRIVATE SDL2::SDL2
     PRIVATE SDL2_image::SDL2_image
 )

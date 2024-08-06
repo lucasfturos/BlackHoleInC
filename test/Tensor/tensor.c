@@ -1,6 +1,5 @@
 #include "../../src/Math/Tensor/tensor.h"
 
-
 void test_tensor_create() {
     int dims[2] = {3, 3};
     Tensor *t = Tensor_create(2, dims);
