@@ -61,8 +61,8 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
         int x = random_range(0, WIDTH - 1);
         int y = random_range(0, HEIGHT - 1);
 
-        int imgX = (int)((double)x / WIDTH * imgWidth);
-        int imgY = (int)((double)y / HEIGHT * imgHeight);
+        int imgX = (int)(x / WIDTH * imgWidth);
+        int imgY = (int)(y / HEIGHT * imgHeight);
 
         Uint32 pixel = pixels[imgY * imgWidth + imgX];
         Uint8 r, g, b;
