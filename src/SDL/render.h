@@ -55,7 +55,7 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
                                             Vec3_create(0.2, 1.0, 0.0),
                                             Vec3_create(0.0, -0.1, 1.0)));
 
-    const double samplePercentage = 1.0;
+    const double samplePercentage = 0.3;
     const int numSamples = (int)(WIDTH * HEIGHT * samplePercentage);
     for (int i = 0; i < numSamples; ++i) {
         int x = random_range(0, WIDTH - 1);

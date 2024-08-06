@@ -12,8 +12,6 @@ project(${PROJECT_NAME})
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 set(RESOURCES_DIRECTORY 
     "${CMAKE_SOURCE_DIR}/assets"
