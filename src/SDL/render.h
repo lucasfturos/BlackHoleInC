@@ -55,14 +55,14 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
                                             Vec3_create(0.2, 1.0, 0.0),
                                             Vec3_create(0.0, -0.1, 1.0)));
 
-    const double samplePercentage = 0.3;
-    const int numSamples = (int)(WIDTH * HEIGHT * samplePercentage);
+    const double samplePercentage = 0.7;
+    const int numSamples = (int)(WIDTH * 0.5 * HEIGHT * 0.5 * samplePercentage);
     for (int i = 0; i < numSamples; ++i) {
         int x = random_range(0, WIDTH - 1);
         int y = random_range(0, HEIGHT - 1);
 
-        int imgX = (int)(x / WIDTH * imgWidth);
-        int imgY = (int)(y / HEIGHT * imgHeight);
+        int imgX = (int)(x / (double)WIDTH * imgWidth);
+        int imgY = (int)(y / (double)HEIGHT * imgHeight);
 
         Uint32 pixel = pixels[imgY * imgWidth + imgX];
         Uint8 r, g, b;
@@ -76,12 +76,16 @@ static inline void render2(SDL_Renderer *ren, SDL_Surface *imgBackground) {
                      world.v[2]));
 
         Vec3 colorRadiance = radiance(camera, rd);
-        Uint8 newR = (0.5 * r + 0.5 * fmin(colorRadiance.x * 0xFF, 0xFF));
-        Uint8 newG = (0.5 * g + 0.5 * fmin(colorRadiance.y * 0xFF, 0xFF));
-        Uint8 newB = (0.5 * b + 0.5 * fmin(colorRadiance.z * 0xFF, 0xFF));
+        Uint8 newR = (Uint8)(fmin(colorRadiance.x * 0xFF, 0xFF));
+        Uint8 newG = (Uint8)(fmin(colorRadiance.y * 0xFF, 0xFF));
+        Uint8 newB = (Uint8)(fmin(colorRadiance.z * 0xFF, 0xFF));
+
+        Uint8 mixedR = (Uint8)((0.5 * r) + (0.5 * newR));
+        Uint8 mixedG = (Uint8)((0.5 * g) + (0.5 * newG));
+        Uint8 mixedB = (Uint8)((0.5 * b) + (0.5 * newB));
 
         double invertedY = HEIGHT - 1 - y;
-        SDL_SetRenderDrawColor(ren, newR, newG, newB, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(ren, mixedR, mixedG, mixedB, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawPoint(ren, x, invertedY);
     }
 }

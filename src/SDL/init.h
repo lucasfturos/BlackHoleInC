@@ -52,8 +52,7 @@ static int initWindow(Resources *res) {
     }
 
     res->win = SDL_CreateWindow("Black Hole in C", SDL_WINDOWPOS_CENTERED,
-                                SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT,
-                                SDL_WINDOW_VULKAN);
+                                SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
 
     if (res->win == NULL) {
         return errorMessage(res, "SDL_CreateWindow Error");

@@ -43,6 +43,10 @@ make
 
 ![](/screenshot/out1.gif)
 
+### Segundo render
+
+![](/screenshot/out2.png)
+
 ## Referências
 
 1. [Implementing General Relativity: Rendering the Schwarzschild black hole, in C++ - James (@20k)](https://20k.github.io/c++/2024/05/31/schwarzschild.html)
