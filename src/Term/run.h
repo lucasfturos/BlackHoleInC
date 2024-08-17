@@ -1,7 +1,7 @@
 #ifndef RUN_H
 #define RUN_H
 
-#include "../BlackHole/blackhole1.h"
+#include "BlackHole/blackhole.h"
 #include <time.h>
 #include <unistd.h>
 

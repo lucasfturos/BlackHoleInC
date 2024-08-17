@@ -1,8 +1,8 @@
 #ifndef MAT3_H
 #define MAT3_H
 
-#include "../Vec/vec3.h"
-#include "../common.h"
+#include "Vec/vec3.h"
+#include "common.h"
 
 typedef struct {
     Vec3 v[3];

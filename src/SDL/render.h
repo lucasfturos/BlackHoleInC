@@ -1,7 +1,7 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "../BlackHole/blackhole.h"
+#include "BlackHole/blackhole.h"
 #include "init.h"
 #include "objects.h"
 

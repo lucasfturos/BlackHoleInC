@@ -1,7 +1,7 @@
 #ifndef VECN_H
 #define VECN_H
 
-#include "../common.h"
+#include "common.h"
 
 typedef struct {
     int size;

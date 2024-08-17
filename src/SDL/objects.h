@@ -1,7 +1,7 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
-#include "../Math/Vec/vec2.h"
+#include "Math/Vec/vec2.h"
 #include <SDL2/SDL.h>
 
 static inline void drawCircle(SDL_Renderer *ren, double x, double y, int radius,

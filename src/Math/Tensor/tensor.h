@@ -1,10 +1,10 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-#include "../Mat/mat3.h"
-#include "../Mat/mat4.h"
-#include "../Vec/vec4.h"
-#include "../common.h"
+#include "Mat/mat3.h"
+#include "Mat/mat4.h"
+#include "Vec/vec4.h"
+#include "common.h"
 #include <string.h>
 
 #define MAX_DIM 4

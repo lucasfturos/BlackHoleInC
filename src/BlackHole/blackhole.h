@@ -1,8 +1,8 @@
 #ifndef BLACKHOLE_H
 #define BLACKHOLE_H
 
-#include "../Math/color.h"
-#include "../Math/noise.h"
+#include "Math/color.h"
+#include "Math/noise.h"
 
 #define dt 0.3
 #define MAX_DIST 5.0
